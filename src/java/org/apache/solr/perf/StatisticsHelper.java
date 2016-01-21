@@ -265,7 +265,6 @@ public class StatisticsHelper implements Runnable {
         System.err.println("Young Generation Heap Size: N/A");
       }
 
-      System.err.println("hasMemoryPools = " + hasMemoryPools + " hasCollectors = " + hasCollectors);
       System.err.println("- - - - - - - - - - - - - - - - - - - - ");
 
       scheduler = Executors.newSingleThreadScheduledExecutor();
