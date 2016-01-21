@@ -259,7 +259,7 @@ class JavaBench:
 
 
 def run_wiki_schemaless_bench(start, tgz, runLogDir, perfFile, gcFile):
-    server = SolrServer(tgz, '%s/wiki_schemaless' % constants.BENCH_DIR, example='schemaless', memory='2g')
+    server = SolrServer(tgz, '%s/wiki_schemaless' % constants.BENCH_DIR, example='schemaless', memory='4g')
     server.extract(runLogDir)
     try:
         bench = JavaBench(os.getcwd())
@@ -281,7 +281,7 @@ def run_wiki_schemaless_bench(start, tgz, runLogDir, perfFile, gcFile):
                                                              '-lineDocsFile', constants.WIKI_1K_DATA_FILE,
                                                              '-docCountLimit', '-1',
                                                              '-threadCount', '16',
-                                                             '-batchSize', '20',
+                                                             '-batchSize', '100',
                                                              '-printDPS'], logFile)
 
         # if docsIndexed != constants.IMDB_NUM_DOCS:
@@ -304,7 +304,7 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                          '-Dcom.sun.management.jmxremote.port=9999',
                          '-Dcom.sun.management.jmxremote.authenticate=false',
                          '-Dcom.sun.management.jmxremote.ssl=false'])
-    server = SolrServer(tgz, '%s/wiki-1k-schema' % constants.BENCH_DIR, example='schemaless', memory='2g', jvm_args=jmx_args)
+    server = SolrServer(tgz, '%s/wiki-1k-schema' % constants.BENCH_DIR, example='schemaless', memory='4g', jvm_args=jmx_args)
     server.extract(runLogDir)
     try:
         bench = JavaBench(os.getcwd())
@@ -338,7 +338,7 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                                                                 # '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
                                                                 '-lineDocsFile', constants.WIKI_1K_DATA_FILE,
                                                                 '-docCountLimit', '-1',
-                                                                '-threadCount', '8',
+                                                                '-threadCount', '16',
                                                                 '-batchSize', '100',
                                                                 '-printDPS'], logFile)
 
@@ -362,7 +362,7 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                 '-Dcom.sun.management.jmxremote.port=9999',
                 '-Dcom.sun.management.jmxremote.authenticate=false',
                 '-Dcom.sun.management.jmxremote.ssl=false'])
-    server = SolrServer(tgz, '%s/wiki-4k-schema' % constants.BENCH_DIR, example='schemaless', memory='2g', jvm_args=jmx_args)
+    server = SolrServer(tgz, '%s/wiki-4k-schema' % constants.BENCH_DIR, example='schemaless', memory='4g', jvm_args=jmx_args)
     server.extract(runLogDir)
     try:
         bench = JavaBench(os.getcwd())
@@ -396,7 +396,7 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                                                                 # '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
                                                                 '-lineDocsFile', constants.WIKI_4K_DATA_FILE,
                                                                 '-docCountLimit', '-1',
-                                                                '-threadCount', '8',
+                                                                '-threadCount', '16',
                                                                 '-batchSize', '100',
                                                                 '-printDPS'], logFile)
 
