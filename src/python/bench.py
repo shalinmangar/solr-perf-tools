@@ -44,11 +44,11 @@ class LuceneSolrCheckout:
                 # checkout
                 if self.revision == 'LATEST':
                     utils.runCommand(
-                            '%s checkout http://svn.apache.org/repos/asf/lucene/dev/trunk . > %s/checkout.log' % (
+                            '%s checkout http://svn.apache.org/repos/asf/lucene/dev/trunk . > %s/checkout.log.txt' % (
                                 constants.SVN_EXE, runLogDir))
                 else:
                     utils.runCommand(
-                            '%s checkout -r %s http://svn.apache.org/repos/asf/lucene/dev/trunk .  > %s/checkout.log' % (
+                            '%s checkout -r %s http://svn.apache.org/repos/asf/lucene/dev/trunk .  > %s/checkout.log.txt' % (
                                 constants.SVN_EXE, self.revision, runLogDir))
                 utils.runCommand('%s ivy-bootstrap' % constants.ANT_EXE)
             else:
@@ -59,17 +59,17 @@ class LuceneSolrCheckout:
     def updateToRevision(self, runLogDir):
         utils.runCommand('%s cleanup' % constants.SVN_EXE)
         if self.revision == 'LATEST':
-            utils.runCommand('%s update > %s/update.log' % (constants.SVN_EXE, runLogDir))
+            utils.runCommand('%s update > %s/update.log.txt' % (constants.SVN_EXE, runLogDir))
         else:
-            utils.runCommand('%s -r %s update > %s/update.log' % (constants.SVN_EXE, self.revision, runLogDir))
+            utils.runCommand('%s -r %s update > %s/update.log.txt' % (constants.SVN_EXE, self.revision, runLogDir))
 
     def build(self, runLogDir):
         x = os.getcwd()
         try:
             os.chdir('%s' % self.checkoutDir)
-            utils.runCommand('%s clean clean-jars > %s/clean.log 2>&1' % (constants.ANT_EXE, runLogDir))
+            utils.runCommand('%s clean clean-jars > %s/clean.log.txt 2>&1' % (constants.ANT_EXE, runLogDir))
             os.chdir('%s/solr' % self.checkoutDir)
-            utils.runCommand('%s create-package > %s/create-package.log 2>&1' % (constants.ANT_EXE, runLogDir))
+            utils.runCommand('%s create-package > %s/create-package.log.txt 2>&1' % (constants.ANT_EXE, runLogDir))
             packaged = os.path.join(os.getcwd(), "package")
             files = glob.glob(os.path.join(packaged, '*.tgz'))
             if len(files) == 0:
@@ -103,7 +103,7 @@ class SolrServer:
             shutil.rmtree(self.extract_dir)
         os.makedirs(self.extract_dir)
         utils.runCommand(
-            'tar xvf %s -C %s --strip-components=1 > %s/extract.log 2>&1' % (self.tgz, self.extract_dir, runLogDir))
+            'tar xvf %s -C %s --strip-components=1 > %s/extract.log.txt 2>&1' % (self.tgz, self.extract_dir, runLogDir))
 
     def start(self, runLogDir):
         x = os.getcwd()
@@ -125,7 +125,7 @@ class SolrServer:
             if self.jvm_args is not None:
                 cmd.append(self.jvm_args)
             utils.info('Running solr with command: %s' % ' '.join(cmd))
-            utils.runComand('solr server', cmd, '%s/server.log' % runLogDir)
+            utils.runComand('solr server', cmd, '%s/server.log.txt' % runLogDir)
         finally:
             os.chdir(x)
 
@@ -158,7 +158,7 @@ def run_simple_bench(start, tgz, runLogDir, perfFile):
 
         solrMajorVersion, solrSvnRevision = server.get_version()
         cmd = ['%s/bin/post' % server.extract_dir, '-c', constants.SOLR_COLLECTION_NAME, constants.IMDB_DATA_FILE]
-        logFile = '%s/simpleIndexer.log' % runLogDir
+        logFile = '%s/simpleIndexer.log.txt' % runLogDir
 
         utils.info('Running simple bench. Logging at: %s' % logFile)
         utils.info('Executing: %s' % ' '.join(cmd))
@@ -211,7 +211,7 @@ class JavaBench:
         cmd = ['javac', '-d', buildDir, '-classpath', ':'.join(server.get_jars())]
         cmd.extend(self.src_files())
         utils.info('Running: %s' % ' '.join(cmd))
-        utils.runComand('javac', cmd, os.path.join(runLogDir, 'java-bench-compile.log'))
+        utils.runComand('javac', cmd, os.path.join(runLogDir, 'java-bench-compile.log.txt'))
 
     def get_run_command(self, server, javaExeClass, cmdArgs):
         cmd = ['java']
@@ -272,7 +272,7 @@ def run_wiki_schemaless_bench(start, tgz, runLogDir, perfFile, gcFile):
 
         solrUrl = 'http://%s:%s/solr/gettingstarted' % (server.host, server.port)
 
-        logFile = '%s/wiki_schemaless.log' % runLogDir
+        logFile = '%s/wiki_schemaless.log.txt' % runLogDir
 
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = bench.run('wiki-1k-schemaless', server,
                                                             'org.apache.solr.perf.WikiIndexer',
@@ -329,7 +329,7 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                                '"delete-copy-field":{ "source":"*", "dest":"_text_"}}')
         print r.json()
 
-        logFile = '%s/wiki-1k-schema.log' % runLogDir
+        logFile = '%s/wiki-1k-schema.log.txt' % runLogDir
 
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = bench.run('wiki-1k-schema', server,
                                                             'org.apache.solr.perf.WikiIndexer',
@@ -387,7 +387,7 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                                '"delete-copy-field":{ "source":"*", "dest":"_text_"}}')
         print r.json()
 
-        logFile = '%s/wiki-4k-schema.log' % runLogDir
+        logFile = '%s/wiki-4k-schema.log.txt' % runLogDir
 
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = bench.run('wiki-4k-schema', server,
                                                             'org.apache.solr.perf.WikiIndexer',
