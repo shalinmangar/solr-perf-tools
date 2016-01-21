@@ -77,6 +77,7 @@ public final class WikiIndexer {
     System.out.println("Line file: " + lineFile);
     System.out.println("Doc count limit: " + (docCountLimit == -1 ? "all docs" : "" + docCountLimit));
     System.out.println("Threads: " + numThreads);
+    System.out.println("Batch size: " + batchSize);
     System.out.println("Verbose: " + (verbose ? "yes" : "no"));
     System.out.println("Do deletions: " + (doDeletions ? "yes" : "no"));
     System.out.println("Repeat docs: " + repeatDocs);
