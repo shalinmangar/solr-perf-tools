@@ -435,6 +435,8 @@ def main():
     if os.path.exists(constants.BENCH_DIR):
         shutil.rmtree(constants.BENCH_DIR)
         os.makedirs(constants.BENCH_DIR)
+    if not os.path.exists(constants.NIGHTLY_REPORTS_DIR):
+        os.makedirs(constants.NIGHTLY_REPORTS_DIR)
     solr = LuceneSolrCheckout(constants.CHECKOUT_DIR)
     start = datetime.datetime.now()
     timeStamp = '%04d.%02d.%02d.%02d.%02d.%02d' % (
