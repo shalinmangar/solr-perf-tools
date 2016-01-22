@@ -127,9 +127,9 @@ def footer(w):
 
 
 def writeIndexingHTML(simpleIndexChartData,
-                      wiki1kSchemaIndexChartData,
+                      wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData,
                       wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData, wiki1kSchemaGcPeakChartData,
-                      wiki4kSchemaIndexChartData,
+                      wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
                       wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData):
     f = open('%s/indexing.html' % constants.NIGHTLY_REPORTS_DIR, 'wb')
     w = f.write
@@ -139,15 +139,19 @@ def writeIndexingHTML(simpleIndexChartData,
     w('<ul>')
     w('<li><a href="#SimpleSchemalessIndex">IMDB dataset (649MB, 2436442 docs)indexed via bin/post in schemaless mode</a></li>')
 
-    w('<li><a href="#Wiki_1k_Index">GB/hour throughput indexing ~1KB docs from wikipedia (31GB, 33332620 docs)</a></li>')
+    w('<li>~1KB docs from wikipedia (31GB, 33332620 docs)</li>')
     w('<ul>')
+    w('<li><a href="#Wiki_1k_Index">GB/hour plain text indexing throughput</a></li>')
+    w('<li><a href="#Wiki_1k_Index_Docs_sec">K docs/sec plain text indexing throughput</a></li>')
     w('<li><a href="#Wiki_1k_GCTimes">JIT/GC times indexing</a></li>')
     w('<li><a href="#Wiki_1k_Garbage">Garbage created</a></li>')
     w('<li><a href="#Wiki_1k_Peak_memory">Peak memory usage</a></li>')
     w('</ul>')
 
-    w('<li><a href="#Wiki_4k_Index">GB/hour throughput indexing ~4KB docs from wikipedia (29GB, 6726515 docs)</a></li>')
+    w('<li>~4KB docs from wikipedia (29GB, 6726515 docs)</li>')
     w('<ul>')
+    w('<li><a href="#Wiki_4k_Index">GB/hour plain text indexing throughput</a></li>')
+    w('<li><a href="#Wiki_4k_Index_Docs_sec">K docs/sec plain text indexing throughput</a></li>')
     w('<li><a href="#Wiki_4k_GCTimes">JIT/GC times indexing</a></li>')
     w('<li><a href="#Wiki_4k_Garbage">Garbage created</a></li>')
     w('<li><a href="#Wiki_4k_Peak_memory">Peak memory usage</a></li>')
@@ -159,6 +163,10 @@ def writeIndexingHTML(simpleIndexChartData,
     w('<br>')
     w('<br>')
     w(getOneGraphHTML('Wiki_1k_Index', wiki1kSchemaIndexChartData, "GB/hour", "~1 KB Wikipedia English docs",
+                      errorBars=False))
+    w('<br>')
+    w('<br>')
+    w(getOneGraphHTML('Wiki_1k_Index_Docs_sec', wiki1kSchemaIndexDocsSecChartData, "k docs/sec", "~1 KB Wikipedia English docs",
                       errorBars=False))
     w('<br>')
     w('<br>')
@@ -175,6 +183,10 @@ def writeIndexingHTML(simpleIndexChartData,
     w('<br>')
     w('<br>')
     w(getOneGraphHTML('Wiki_4k_Index', wiki1kSchemaIndexChartData, "GB/hour", "~4 KB Wikipedia English docs",
+                      errorBars=False))
+    w('<br>')
+    w('<br>')
+    w(getOneGraphHTML('Wiki_4k_Index_Docs_sec', wiki4kSchemaIndexDocsSecChartData, "k docs/sec", "~4 KB Wikipedia English docs",
                       errorBars=False))
     w('<br>')
     w('<br>')

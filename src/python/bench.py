@@ -479,6 +479,7 @@ def main():
     wiki1kSchemaGcFile = '%s/wiki_1k_schema.gc.txt' % constants.LOG_BASE_DIR
     run_wiki_1k_schema_bench(start, tgz, runLogDir, wiki1kSchemaPerfFile, wiki1kSchemaGcFile)
     wiki1kSchemaIndexChartData = []
+    wiki1kSchemaIndexDocsSecChartData = []
     wiki1kSchemaGcTimesChartData = []
     wiki1kSchemaGcGarbageChartData = []
     wiki1kSchemaGcPeakChartData = []
@@ -490,14 +491,19 @@ def main():
             timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrSvnRevision = l.split(',')
             wiki1kSchemaIndexChartData.append(
                     '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
+            wiki1kSchemaIndexDocsSecChartData.append('%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
 
     wiki1kSchemaIndexChartData.sort()
     wiki1kSchemaIndexChartData.insert(0, 'Date,GB/hour')
+
+    wiki1kSchemaIndexDocsSecChartData.sort()
+    wiki1kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
     wiki4kSchemaPerfFile = '%s/wiki_4k_schema.perfdata.txt' % constants.LOG_BASE_DIR
     wiki4kGcFile = '%s/wiki_4k_schema.gc.txt' % constants.LOG_BASE_DIR
     run_wiki_4k_schema_bench(start, tgz, runLogDir, wiki4kSchemaPerfFile, wiki4kGcFile)
     wiki4kSchemaIndexChartData = []
+    wiki4kSchemaIndexDocsSecChartData = []
 
     wiki4kSchemaGcTimesChartData = []
     wiki4kSchemaGcGarbageChartData = []
@@ -511,14 +517,18 @@ def main():
             timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrSvnRevision = l.split(',')
             wiki4kSchemaIndexChartData.append(
                     '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
+            wiki4kSchemaIndexDocsSecChartData.append('%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
 
     wiki4kSchemaIndexChartData.sort()
     wiki4kSchemaIndexChartData.insert(0, 'Date,GB/hour')
 
+    wiki4kSchemaIndexDocsSecChartData.sort()
+    wiki4kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
+
     graphutils.writeIndexingHTML(simpleIndexChartData,
-                                 wiki1kSchemaIndexChartData, wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData,
-                                 wiki1kSchemaGcPeakChartData,
-                                 wiki4kSchemaIndexChartData,
+                                 wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData,
+                                 wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData, wiki1kSchemaGcPeakChartData,
+                                 wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
                                  wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData)
 
 
