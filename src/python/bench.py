@@ -4,6 +4,7 @@ import glob
 import os
 import re
 import shutil
+import sys
 
 import datetime
 import requests
@@ -24,6 +25,8 @@ reGarbageIn = re.compile('^\s*Garbage Generated in (.*?): (.*) MiB$')
 
 # Peak usage in Young Generation: 341.375 MiB
 rePeakUsage = re.compile('^\s*Peak usage in (.*?): (.*) MiB')
+
+SLACK = '-enable-slack-bot' in sys.argv and os.environ['SLACK_BOT_TOKEN']
 
 class LuceneSolrCheckout:
     def __init__(self, checkoutDir, revision='LATEST'):
@@ -180,6 +183,8 @@ def run_simple_bench(start, tgz, runLogDir, perfFile):
                 start.year, start.month, start.day, start.hour, start.minute, start.second)
             f.write('%s,%d,%d,%.1f,%s,%s\n' % (
                 timeStampLoggable, bytesIndexed, docsIndexed, t1, solrMajorVersion, solrSvnRevision))
+
+        return bytesIndexed, docsIndexed, t1
     finally:
         server.stop()
         time.sleep(5)
@@ -352,6 +357,7 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                 timeStampLoggable, bytesIndexed, docsIndexed, indexTimeSec, solrMajorVersion, solrSvnRevision))
 
         write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrSvnRevision, times, garbage, peak)
+        return bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak
     finally:
         server.stop()
         time.sleep(5)
@@ -411,6 +417,8 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                 timeStampLoggable, bytesIndexed, docsIndexed, indexTimeSec, solrMajorVersion, solrSvnRevision))
 
         write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrSvnRevision, times, garbage, peak)
+
+        return bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak
     finally:
         server.stop()
         time.sleep(5)
@@ -432,6 +440,7 @@ def write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrSvnRevision, 
         f.write('\n')
 
 def main():
+    t0 = time.time()
     if os.path.exists(constants.BENCH_DIR):
         shutil.rmtree(constants.BENCH_DIR)
         os.makedirs(constants.BENCH_DIR)
@@ -441,19 +450,31 @@ def main():
     start = datetime.datetime.now()
     timeStamp = '%04d.%02d.%02d.%02d.%02d.%02d' % (
         start.year, start.month, start.day, start.hour, start.minute, start.second)
+
+    if SLACK:
+        # https://lucidworks.slack.com/services/hooks/slackbot?token=TOKEN&channel=%23channel'
+        slackUrl = os.environ('SLACK_URL')
+        slackChannel = os.environ('SLACK_CHANNEL')
+        slackToken = os.environ('SLACK_BOT_TOKEN')
+        r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel), 'Solr performance test started at %s' % timeStamp)
+        print r
+
     runLogDir = '%s/%s' % (constants.LOG_BASE_DIR, timeStamp)
     os.makedirs(runLogDir)
     solr.checkout(runLogDir)
     tgz = solr.build(runLogDir)
     utils.info('Solr tgz file created at: %s' % tgz)
 
+    svnRevision = ''
+
     simplePerfFile = '%s/simpleIndexer.perfdata.txt' % constants.LOG_BASE_DIR
-    run_simple_bench(start, tgz, runLogDir, simplePerfFile)
+    simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken = run_simple_bench(start, tgz, runLogDir, simplePerfFile)
     simpleIndexChartData = []
     with open(simplePerfFile, 'r') as f:
         lines = [line.rstrip('\n') for line in f]
         for l in lines:
             timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrSvnRevision = l.split(',')
+            svnRevision = solrSvnRevision
             simpleIndexChartData.append(
                     '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024.)) / float(timeTaken)))
 
@@ -477,7 +498,8 @@ def main():
 
     wiki1kSchemaPerfFile = '%s/wiki_1k_schema.perfdata.txt' % constants.LOG_BASE_DIR
     wiki1kSchemaGcFile = '%s/wiki_1k_schema.gc.txt' % constants.LOG_BASE_DIR
-    run_wiki_1k_schema_bench(start, tgz, runLogDir, wiki1kSchemaPerfFile, wiki1kSchemaGcFile)
+    wiki1kBytesIndexed, wiki1kIndexTimeSec, wiki1kDocsIndexed, \
+    wiki1kTimes, wiki1kGarbage, wiki1kPeak = run_wiki_1k_schema_bench(start, tgz, runLogDir, wiki1kSchemaPerfFile, wiki1kSchemaGcFile)
     wiki1kSchemaIndexChartData = []
     wiki1kSchemaIndexDocsSecChartData = []
     wiki1kSchemaGcTimesChartData = []
@@ -489,6 +511,7 @@ def main():
         lines = [line.rstrip('\n') for line in f]
         for l in lines:
             timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrSvnRevision = l.split(',')
+            svnRevision = solrSvnRevision
             wiki1kSchemaIndexChartData.append(
                     '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
             wiki1kSchemaIndexDocsSecChartData.append('%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
@@ -501,7 +524,8 @@ def main():
 
     wiki4kSchemaPerfFile = '%s/wiki_4k_schema.perfdata.txt' % constants.LOG_BASE_DIR
     wiki4kGcFile = '%s/wiki_4k_schema.gc.txt' % constants.LOG_BASE_DIR
-    run_wiki_4k_schema_bench(start, tgz, runLogDir, wiki4kSchemaPerfFile, wiki4kGcFile)
+    wiki4kBytesIndexed, wiki4kIndexTimeSec, wiki4kDocsIndexed, \
+    wiki4kTimes, wiki4kGarbage, wiki4kPeak = run_wiki_4k_schema_bench(start, tgz, runLogDir, wiki4kSchemaPerfFile, wiki4kGcFile)
     wiki4kSchemaIndexChartData = []
     wiki4kSchemaIndexDocsSecChartData = []
 
@@ -515,6 +539,7 @@ def main():
         lines = [line.rstrip('\n') for line in f]
         for l in lines:
             timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrSvnRevision = l.split(',')
+            svnRevision = solrSvnRevision
             wiki4kSchemaIndexChartData.append(
                     '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
             wiki4kSchemaIndexDocsSecChartData.append('%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
@@ -530,6 +555,28 @@ def main():
                                  wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData, wiki1kSchemaGcPeakChartData,
                                  wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
                                  wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData)
+
+    totalBenchTime = time.time() - t0
+    print 'Total bench time: %d' % totalBenchTime
+    if SLACK:
+        # https://lucidworks.slack.com/services/hooks/slackbot?token=TOKEN&channel=%23channel'
+        slackUrl = os.environ('SLACK_URL')
+        slackChannel = os.environ('SLACK_CHANNEL')
+        slackToken = os.environ('SLACK_BOT_TOKEN')
+        message = 'Solr performance test r%s completed in %d:\n' \
+                  'Start: %s' \
+                  'simple: %.1f json MB/sec\n' \
+                  'wiki_1k_schema: %.1f GB/hour %.1f k docs/sec\n' \
+                  'wiki_4k_schema: %.1f GB/hour %.1f k docs/sec' \
+                  % (svnRevision, totalBenchTime, timeStamp,
+                                    (int(simpleBytesIndexed) / (1024 * 1024.)) / float(simpleTimeTaken),
+                     (int(wiki1kBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki1kIndexTimeSec) / 3600.),
+                     (int(wiki1kDocsIndexed) / 1000) / float(wiki1kIndexTimeSec),
+                     (int(wiki4kBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki4kIndexTimeSec) / 3600.),
+                     (int(wiki4kDocsIndexed) / 1000) / float(wiki4kIndexTimeSec))
+        r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel), message)
+        print 'slackbot request posted:'
+        print r
 
 
 def populate_gc_data(gcFile, gcGarbageChartData, gcPeakChartData, gcTimesChartData):
