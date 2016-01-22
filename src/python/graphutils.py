@@ -113,6 +113,13 @@ def header(w, title):
 
 
 def footer(w):
+    w('<br>')
+    # w('Solr options:')
+    # w('<ul>')
+    # w('<li>IMDB dataset: <code>bin/solr -e schemaless -m 4g</code></li>')
+    # w('<li>Wiki 1KB dataset: <code>bin/solr -e schemaless -m 4g</code></li>')
+    # w('<li>Wiki 4KB dataset: <code>bin/solr -e schemaless -m 4g</code></li>')
+    # w('</ul>')
     w(
         '<br><em>[last updated: %s; send questions to <a href="mailto:shalin@apache.org">Shalin Shekhar Mangar</a>]</em>' % datetime.datetime.now())
     w('</body>')
@@ -129,6 +136,24 @@ def writeIndexingHTML(simpleIndexChartData,
     header(w, 'Solr nightly indexing benchmark')
     w('<h1>Indexing Throughput</h1>\n')
     w('<br>')
+    w('<ul>')
+    w('<li><a href="#SimpleSchemalessIndex">IMDB dataset (649MB, 2436442 docs)indexed via bin/post in schemaless mode</a></li>')
+
+    w('<li><a href="#Wiki_1k_Index">GB/hour throughput indexing ~1KB docs from wikipedia (31GB, 33332620 docs)</a></li>')
+    w('<ul>')
+    w('<li><a href="#Wiki_1k_GCTimes">JIT/GC times indexing</a></li>')
+    w('<li><a href="#Wiki_1k_Garbage">Garbage created</a></li>')
+    w('<li><a href="#Wiki_1k_Peak_memory">Peak memory usage</a></li>')
+    w('</ul>')
+
+    w('<li><a href="#Wiki_4k_Index">GB/hour throughput indexing ~4KB docs from wikipedia (29GB, 6726515 docs)</a></li>')
+    w('<ul>')
+    w('<li><a href="#Wiki_4k_GCTimes">JIT/GC times indexing</a></li>')
+    w('<li><a href="#Wiki_4k_Garbage">Garbage created</a></li>')
+    w('<li><a href="#Wiki_4k_Peak_memory">Peak memory usage</a></li>')
+    w('</ul>')
+
+    w('</ul>')
     w(getOneGraphHTML('SimpleSchemalessIndex', simpleIndexChartData, "JSON MB/sec", "IMDB",
                       errorBars=False))
     w('<br>')
