@@ -26,7 +26,7 @@ reGarbageIn = re.compile('^\s*Garbage Generated in (.*?): (.*) MiB$')
 # Peak usage in Young Generation: 341.375 MiB
 rePeakUsage = re.compile('^\s*Peak usage in (.*?): (.*) MiB')
 
-SLACK = '-enable-slack-bot' in sys.argv and os.environ['SLACK_BOT_TOKEN']
+SLACK = '-enable-slack-bot' in sys.argv and 'SLACK_BOT_TOKEN' in os.environ
 
 class LuceneSolrCheckout:
     def __init__(self, checkoutDir, revision='LATEST'):
@@ -452,10 +452,9 @@ def main():
         start.year, start.month, start.day, start.hour, start.minute, start.second)
 
     if SLACK:
-        # https://lucidworks.slack.com/services/hooks/slackbot?token=TOKEN&channel=%23channel'
-        slackUrl = os.environ('SLACK_URL')
-        slackChannel = os.environ('SLACK_CHANNEL')
-        slackToken = os.environ('SLACK_BOT_TOKEN')
+        slackUrl = os.environ.get('SLACK_URL')
+        slackChannel = os.environ.get('SLACK_CHANNEL')
+        slackToken = os.environ.get('SLACK_BOT_TOKEN')
         r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel), 'Solr performance test started at %s' % timeStamp)
         print r
 
@@ -557,17 +556,16 @@ def main():
                                  wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData)
 
     totalBenchTime = time.time() - t0
-    print 'Total bench time: %d' % totalBenchTime
+    print 'Total bench time: %d seconds' % totalBenchTime
     if SLACK:
-        # https://lucidworks.slack.com/services/hooks/slackbot?token=TOKEN&channel=%23channel'
-        slackUrl = os.environ('SLACK_URL')
-        slackChannel = os.environ('SLACK_CHANNEL')
-        slackToken = os.environ('SLACK_BOT_TOKEN')
-        message = 'Solr performance test r%s completed in %d:\n' \
-                  'Start: %s' \
-                  'simple: %.1f json MB/sec\n' \
-                  'wiki_1k_schema: %.1f GB/hour %.1f k docs/sec\n' \
-                  'wiki_4k_schema: %.1f GB/hour %.1f k docs/sec' \
+        slackUrl = os.environ.get('SLACK_URL')
+        slackChannel = os.environ.get('SLACK_CHANNEL')
+        slackToken = os.environ.get('SLACK_BOT_TOKEN')
+        message = 'Solr performance test on r%s completed in %d seconds:\n' \
+                  '\t Start: %s\n' \
+                  '\t simple: %.1f json MB/sec\n' \
+                  '\t wiki_1k_schema: %.1f GB/hour %.1f k docs/sec\n' \
+                  '\t wiki_4k_schema: %.1f GB/hour %.1f k docs/sec' \
                   % (svnRevision, totalBenchTime, timeStamp,
                                     (int(simpleBytesIndexed) / (1024 * 1024.)) / float(simpleTimeTaken),
                      (int(wiki1kBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki1kIndexTimeSec) / 3600.),
