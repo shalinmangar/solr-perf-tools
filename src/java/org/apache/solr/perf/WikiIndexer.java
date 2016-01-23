@@ -88,7 +88,7 @@ public final class WikiIndexer {
     if (useHttpSolrClient) {
       client = new HttpSolrClient(solrUrl);
     } else if (useConcurrentUpdateSolrClient) {
-      client = new ConcurrentUpdateSolrClient(solrUrl, batchSize * numThreads, numThreads);
+      client = new ConcurrentUpdateSolrClient(solrUrl, batchSize * 2, numThreads);
     } else if (useCloudSolrClient) {
       CloudSolrClient c = new CloudSolrClient(zkHost);
       c.setDefaultCollection(collectionName);
