@@ -190,7 +190,7 @@ def writeIndexingHTML(annotations, simpleIndexChartData,
 
     w('<br>')
     w('<br>')
-    w(getOneGraphHTML(annotations, 'Wiki_4k_Index', wiki1kSchemaIndexChartData, "GB/hour", "~4 KB Wikipedia English docs",
+    w(getOneGraphHTML(annotations, 'Wiki_4k_Index', wiki4kSchemaIndexChartData, "GB/hour", "~4 KB Wikipedia English docs",
                       errorBars=False))
     w('<br>')
     w('<br>')
