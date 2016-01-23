@@ -1,7 +1,7 @@
 #!/bin/python
 
 ANT_EXE = 'ant'
-SVN_EXE = 'svn'
+GIT_EXE = 'git'
 
 TEST_BASE_DIR = '/solr-bench'
 LOG_BASE_DIR = '%s/logs' % TEST_BASE_DIR
