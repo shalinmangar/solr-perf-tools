@@ -40,7 +40,14 @@ KNOWN_CHANGES = [
      """
      Changed indexer to use ConcurrentHttpSolrClient instead of HttpSolrClient. Dropped indexing threads
      from 16 to 8. Client heap size increased to 4g from 2g. Fixed bug in indexer which caused last batch to not be indexed.
-     """)
+     """),
+    ('2016-01-23 21:35',
+     'ConcurrentHttpSolrClient now uses binary request writer instead of default xml writer',
+     """
+     ConcurrentHttpSolrClient now uses binary request writer instead of default xml writer. Also we explicitly set
+     request writer, response writer and poll time=0 for ConcurrentHttpSolrClient
+     """
+     )
 ]
 
 
