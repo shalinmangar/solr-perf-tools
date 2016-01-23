@@ -26,4 +26,4 @@ WIKI_4k_NUM_DOCS = 6726515
 CHECKOUT_DIR = '%s/checkout' % TEST_BASE_DIR
 BENCH_DIR = '%s/solr' % TEST_BASE_DIR
 
-JVM_CLIENT_PARAMS = ['-server', '-Xms2g', '-Xmx2g', '-XX:-TieredCompilation', '-XX:+HeapDumpOnOutOfMemoryError', '-Xbatch']
+JVM_CLIENT_PARAMS = ['-server', '-Xms4g', '-Xmx4g', '-XX:-TieredCompilation', '-XX:+HeapDumpOnOutOfMemoryError', '-Xbatch']
