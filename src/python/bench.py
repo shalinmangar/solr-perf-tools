@@ -4,10 +4,10 @@ import glob
 import os
 import re
 import shutil
-import sys
 
 import datetime
 import requests
+import sys
 import time
 
 import constants
@@ -27,6 +27,16 @@ reGarbageIn = re.compile('^\s*Garbage Generated in (.*?): (.*) MiB$')
 rePeakUsage = re.compile('^\s*Peak usage in (.*?): (.*) MiB')
 
 SLACK = '-enable-slack-bot' in sys.argv and 'SLACK_BOT_TOKEN' in os.environ
+
+KNOWN_CHANGES = [
+    ('2016-01-22 17:43',
+     'SOLR-8582: /update/json/docs is 4x slower than /update for indexing a list of json docs',
+     """
+     Fixed memory leak in JsonRecordReader affecting /update/json/docs. Large payloads cause OOM.
+     Brings performance on par with /update for large json lists.
+     """)
+]
+
 
 class LuceneSolrCheckout:
     def __init__(self, checkoutDir, revision='LATEST'):
@@ -248,7 +258,7 @@ class JavaBench:
             for line in f.readlines():
                 m = reTimeIn.search(line)
                 if m is not None:
-                    times[m.group(1)] = float(m.group(2))/1000.
+                    times[m.group(1)] = float(m.group(2)) / 1000.
                 m = reGarbageIn.search(line)
                 if m is not None:
                     garbage[m.group(1)] = float(m.group(2))
@@ -469,6 +479,7 @@ def main():
     simplePerfFile = '%s/simpleIndexer.perfdata.txt' % constants.LOG_BASE_DIR
     simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken = run_simple_bench(start, tgz, runLogDir, simplePerfFile)
     simpleIndexChartData = []
+    annotations = []
     with open(simplePerfFile, 'r') as f:
         lines = [line.rstrip('\n') for line in f]
         for l in lines:
@@ -476,6 +487,11 @@ def main():
             svnRevision = solrSvnRevision
             simpleIndexChartData.append(
                     '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024.)) / float(timeTaken)))
+            for date, desc, fullDesc in KNOWN_CHANGES:
+                if timeStamp.startswith(date):
+                    print('add annot for simple %s' % desc)
+                    annotations.append((date, timeStamp, desc, fullDesc))
+                    KNOWN_CHANGES.remove((date, desc, fullDesc))
 
     simpleIndexChartData.sort()
     simpleIndexChartData.insert(0, 'Date,MB/sec')
@@ -549,11 +565,14 @@ def main():
     wiki4kSchemaIndexDocsSecChartData.sort()
     wiki4kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
-    graphutils.writeIndexingHTML(simpleIndexChartData,
+    graphutils.writeIndexingHTML(annotations,
+                                 simpleIndexChartData,
                                  wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData,
-                                 wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData, wiki1kSchemaGcPeakChartData,
+                                 wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData,
+                                 wiki1kSchemaGcPeakChartData,
                                  wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
-                                 wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData)
+                                 wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData,
+                                 wiki4kSchemaGcPeakChartData)
 
     totalBenchTime = time.time() - t0
     print 'Total bench time: %d seconds' % totalBenchTime
