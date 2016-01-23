@@ -19,9 +19,7 @@ package org.apache.solr.perf;
 
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.impl.CloudSolrClient;
-import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.*;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -86,9 +84,16 @@ public final class WikiIndexer {
 
     final SolrClient client;
     if (useHttpSolrClient) {
-      client = new HttpSolrClient(solrUrl);
+      HttpSolrClient c = new HttpSolrClient(solrUrl);
+      c.setParser(new BinaryResponseParser());
+      c.setRequestWriter(new BinaryRequestWriter());
+      client = c;
     } else if (useConcurrentUpdateSolrClient) {
-      client = new ConcurrentUpdateSolrClient(solrUrl, batchSize * 2, numThreads);
+      ConcurrentUpdateSolrClient c = new ConcurrentUpdateSolrClient(solrUrl, batchSize * 2, numThreads);
+      c.setParser(new BinaryResponseParser());
+      c.setRequestWriter(new BinaryRequestWriter());
+      c.setPollQueueTime(0);
+      client = c;
     } else if (useCloudSolrClient) {
       CloudSolrClient c = new CloudSolrClient(zkHost);
       c.setDefaultCollection(collectionName);
