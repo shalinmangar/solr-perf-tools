@@ -23,6 +23,7 @@ import org.apache.solr.common.SolrInputDocument;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -190,6 +191,9 @@ class IndexThreads {
               for (int i=0; i<batchSize; i++) {
                 final SolrInputDocument doc = docs.nextDoc(docState);
                 if (doc == null) {
+                  if (!list.isEmpty())  {
+                    client.add(list);
+                  }
                   break outer;
                 }
 //              Object id = doc.getFieldValue("id");
@@ -207,7 +211,11 @@ class IndexThreads {
                   break;
                 }
                 if ((docCount % 100000) == 0) {
-                  System.out.println("Indexer: " + docCount + " docs... (" + (System.currentTimeMillis() - tStart) + " msec)");
+                  long timeSinceStart = System.currentTimeMillis() - tStart;
+                  System.out.format(Locale.ROOT, "Indexer: %d docs at %.2f sec (%.1f MB/sec %.1f docs/sec)\n",
+                          docCount, timeSinceStart/1000.,
+                          (docs.getBytesIndexed() / 1024. / 1024 / (timeSinceStart / 1000.)),
+                          (docCount / (timeSinceStart / 1000.)));
                 }
                 list.add(doc);
               }
