@@ -592,17 +592,19 @@ def main():
         slackUrl = os.environ.get('SLACK_URL')
         slackChannel = os.environ.get('SLACK_CHANNEL')
         slackToken = os.environ.get('SLACK_BOT_TOKEN')
-        message = 'Solr performance test on r%s completed in %d seconds:\n' \
+        message = 'Solr performance test on git sha %s completed in %d seconds:\n' \
                   '\t Start: %s\n' \
                   '\t simple: %.1f json MB/sec\n' \
                   '\t wiki_1k_schema: %.1f GB/hour %.1f k docs/sec\n' \
-                  '\t wiki_4k_schema: %.1f GB/hour %.1f k docs/sec' \
+                  '\t wiki_4k_schema: %.1f GB/hour %.1f k docs/sec\n' \
+                  '\t See complete report at: %s' \
                   % (implVersion, totalBenchTime, timeStamp,
                                     (int(simpleBytesIndexed) / (1024 * 1024.)) / float(simpleTimeTaken),
                      (int(wiki1kBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki1kIndexTimeSec) / 3600.),
                      (int(wiki1kDocsIndexed) / 1000) / float(wiki1kIndexTimeSec),
                      (int(wiki4kBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki4kIndexTimeSec) / 3600.),
-                     (int(wiki4kDocsIndexed) / 1000) / float(wiki4kIndexTimeSec))
+                     (int(wiki4kDocsIndexed) / 1000) / float(wiki4kIndexTimeSec),
+                     os.environ.get('SLACK_REPORT_URL'))
         r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel), message)
         print 'slackbot request posted:'
         print r
