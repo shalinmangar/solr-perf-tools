@@ -36,10 +36,10 @@ KNOWN_CHANGES = [
      Brings performance on par with /update for large json lists.
      """),
     ('2016-01-23 20:11:11',
-     'Fixed off-by-one bug in indexer. Use ConcurrentHttpSolrClient, 8 threads, batchSize=100',
+     'ConcurrentHttpSolrClient, 8 threads, batchSize=100, queueSize=200, 4g client heap. Fixed minor bug in indexer.',
      """
      Changed indexer to use ConcurrentHttpSolrClient instead of HttpSolrClient. Dropped indexing threads
-     from 16 to 8. Fixed bug in indexer which caused last batch to not be indexed.
+     from 16 to 8. Client heap size increased to 4g from 2g. Fixed bug in indexer which caused last batch to not be indexed.
      """)
 ]
 
