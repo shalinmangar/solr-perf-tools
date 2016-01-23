@@ -292,8 +292,9 @@ def run_wiki_schemaless_bench(start, tgz, runLogDir, perfFile, gcFile):
 
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = bench.run('wiki-1k-schemaless', server,
                                                             'org.apache.solr.perf.WikiIndexer',
-                                                            ['-useHttpSolrClient', '-solrUrl', solrUrl,
-                                                             # '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
+                                                            [
+                                                                                      # '-useHttpSolrClient', '-solrUrl', solrUrl,
+                                                             '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
                                                              '-lineDocsFile', constants.WIKI_1K_DATA_FILE,
                                                              '-docCountLimit', '-1',
                                                              '-threadCount', '16',
@@ -350,8 +351,8 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = bench.run('wiki-1k-schema', server,
                                                             'org.apache.solr.perf.WikiIndexer',
                                                             [
-                                                                '-useHttpSolrClient', '-solrUrl', solrUrl,
-                                                                # '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
+                                                                # '-useHttpSolrClient', '-solrUrl', solrUrl,
+                                                                '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
                                                                 '-lineDocsFile', constants.WIKI_1K_DATA_FILE,
                                                                 '-docCountLimit', '-1',
                                                                 '-threadCount', '16',
@@ -409,8 +410,8 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = bench.run('wiki-4k-schema', server,
                                                             'org.apache.solr.perf.WikiIndexer',
                                                             [
-                                                                '-useHttpSolrClient', '-solrUrl', solrUrl,
-                                                                # '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
+                                                                # '-useHttpSolrClient', '-solrUrl', solrUrl,
+                                                                '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
                                                                 '-lineDocsFile', constants.WIKI_4K_DATA_FILE,
                                                                 '-docCountLimit', '-1',
                                                                 '-threadCount', '16',
