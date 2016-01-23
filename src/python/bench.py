@@ -297,9 +297,8 @@ def run_wiki_schemaless_bench(start, tgz, runLogDir, perfFile, gcFile):
                                                              '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
                                                              '-lineDocsFile', constants.WIKI_1K_DATA_FILE,
                                                              '-docCountLimit', '-1',
-                                                             '-threadCount', '16',
-                                                             '-batchSize', '100',
-                                                             '-printDPS'], logFile)
+                                                             '-threadCount', '8',
+                                                             '-batchSize', '100'], logFile)
 
         # if docsIndexed != constants.IMDB_NUM_DOCS:
         #     raise RuntimeError(
@@ -355,9 +354,8 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                                                                 '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
                                                                 '-lineDocsFile', constants.WIKI_1K_DATA_FILE,
                                                                 '-docCountLimit', '-1',
-                                                                '-threadCount', '16',
-                                                                '-batchSize', '100',
-                                                                '-printDPS'], logFile)
+                                                                '-threadCount', '8',
+                                                                '-batchSize', '100'], logFile)
 
         # if docsIndexed != constants.IMDB_NUM_DOCS:
         #     raise RuntimeError(
@@ -414,9 +412,8 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                                                                 '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
                                                                 '-lineDocsFile', constants.WIKI_4K_DATA_FILE,
                                                                 '-docCountLimit', '-1',
-                                                                '-threadCount', '16',
-                                                                '-batchSize', '100',
-                                                                '-printDPS'], logFile)
+                                                                '-threadCount', '8',
+                                                                '-batchSize', '100'], logFile)
 
         # if docsIndexed != constants.IMDB_NUM_DOCS:
         #     raise RuntimeError(
