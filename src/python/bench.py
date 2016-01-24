@@ -47,7 +47,12 @@ KNOWN_CHANGES = [
      ConcurrentHttpSolrClient now uses binary request writer instead of default xml writer. Also we explicitly set
      request writer, response writer and poll time=0 for ConcurrentHttpSolrClient
      """
-     )
+     ),
+    ('2016-01-23 23:20',
+     'Client threads increased to 10 from 8',
+     """
+     Client threads increased to 10 from 8
+     """)
 ]
 
 
