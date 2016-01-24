@@ -52,6 +52,11 @@ KNOWN_CHANGES = [
      'Client threads increased to 10 from 8',
      """
      Client threads increased to 10 from 8
+     """),
+    ('2016-01-24 06:05',
+     'Client threads decreased from 10 to 9',
+     """
+     Client threads decreased from 10 to 9
      """)
 ]
 
