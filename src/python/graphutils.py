@@ -145,7 +145,7 @@ def writeIndexingHTML(annotations, simpleIndexChartData,
     w('<h1>Indexing Throughput</h1>\n')
     w('<br>')
     w('<ul>')
-    w('<li><a href="#SimpleSchemalessIndex">IMDB dataset (649MB, 2436442 docs)indexed via bin/post in schemaless mode</a></li>')
+    w('<li><a href="#SimpleSchemalessIndex">IMDB dataset (649MB, 2436442 docs) indexed via bin/post in schemaless mode</a></li>')
 
     w('<li>~1KB docs from wikipedia (31GB, 33332620 docs)</li>')
     w('<ul>')
