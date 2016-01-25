@@ -58,7 +58,7 @@ public final class WikiIndexer {
 
     // -1 means all docs in the line file:
     final int docCountLimit = args.getInt("-docCountLimit");
-    final int numThreads = args.getInt("-threadCount");
+    int numThreads = args.getInt("-threadCount");
     final int batchSize = args.getInt("-batchSize");
 
     final boolean verbose = args.getFlag("-verbose");
@@ -94,6 +94,7 @@ public final class WikiIndexer {
       c.setRequestWriter(new BinaryRequestWriter());
       c.setPollQueueTime(0);
       client = c;
+      numThreads = 1; // no need to spawn multiple feeder threads when using ConcurrentUpdateSolrClient
     } else if (useCloudSolrClient) {
       CloudSolrClient c = new CloudSolrClient(zkHost);
       c.setDefaultCollection(collectionName);
