@@ -26,11 +26,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class WikiIndexer {
 
-  public static void main(String[] args) throws Exception {
-    StatisticsHelper stats = StatisticsHelper.createRemoteStats();
+  public static void main(String[] clArgs) throws Exception {
+    Args args = new Args(clArgs);
+    StatisticsHelper stats;
+    if (args.getFlag("-useCloudSolrClient")) {
+      // todo fix this
+      stats = StatisticsHelper.createLocalStats();
+    } else  {
+      stats = StatisticsHelper.createRemoteStats();
+    }
     stats.startStatistics();
     try {
-      _main(args);
+      _main(clArgs);
     } finally {
       stats.stopStatistics();
     }

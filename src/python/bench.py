@@ -126,12 +126,13 @@ class LuceneSolrCheckout:
 
 
 class SolrServer:
-    def __init__(self, tgz, extract_dir, host='localhost', port='8983',
+    def __init__(self, tgz, extract_dir, name='', host='localhost', port='8983',
                  memory=None,
                  zk_host=None, server_dir=None, solr_home=None,
                  example=None, jvm_args=None):
         self.tgz = tgz
         self.extract_dir = extract_dir
+        self.name = name
         self.host = host
         self.port = port
         self.memory = memory
@@ -146,7 +147,7 @@ class SolrServer:
             shutil.rmtree(self.extract_dir)
         os.makedirs(self.extract_dir)
         utils.runCommand(
-            'tar xvf %s -C %s --strip-components=1 > %s/extract.log.txt 2>&1' % (self.tgz, self.extract_dir, runLogDir))
+            'tar xvf %s -C %s --strip-components=1 > %s/extract%s.log.txt 2>&1' % (self.tgz, self.extract_dir, runLogDir, self.name))
 
     def start(self, runLogDir):
         x = os.getcwd()
@@ -168,12 +169,24 @@ class SolrServer:
             if self.jvm_args is not None:
                 cmd.append(self.jvm_args)
             utils.info('Running solr with command: %s' % ' '.join(cmd))
-            utils.runComand('solr server', cmd, '%s/server.log.txt' % runLogDir)
+            utils.runComand('solr server', cmd, '%s/server%s.log.txt' % (runLogDir, self.name))
+        finally:
+            os.chdir(x)
+
+    def create_collection(self, runLogDir, collection, num_shards='1', replication_factor='1', config = 'data_driven_schema_configs'):
+        x = os.getcwd()
+        try:
+            os.chdir(self.extract_dir)
+            cmd = ['%s/bin/solr' % self.extract_dir, 'create_collection', '-p', self.port,
+                   '-c', collection, '-shards', num_shards, '-replicationFactor', replication_factor,
+                   '-d', config]
+            utils.info('Creating collection with command: %s' % ' '.join(cmd))
+            utils.runComand('solr create_collection', cmd, '%s/create-collection%s.log.txt' % (runLogDir, self.name))
         finally:
             os.chdir(x)
 
     def stop(self):
-        utils.runCommand('%s/bin/solr stop' % self.extract_dir)
+        utils.runCommand('%s/bin/solr stop -p %s' % (self.extract_dir, self.port))
 
     def get_version(self):
         r = requests.get('http://%s:%s/solr/admin/info/system?wt=json' % (self.host, self.port))
@@ -462,6 +475,90 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
         time.sleep(5)
 
 
+def run_wiki_1k_schema_cloud_bench(start, tgz, runLogDir, perfFile, gcFile):
+    # we start in schemaless mode but use the schema api to add the right fields
+    jmx_args = [
+        # '-Dcom.sun.management.jmxremote',
+        #         '-Dcom.sun.management.jmxremote.port=9999',
+        #         '-Dcom.sun.management.jmxremote.authenticate=false',
+        #         '-Dcom.sun.management.jmxremote.ssl=false',
+                '-c']
+    server = SolrServer(tgz, '%s/wiki-1k-schema_cloud_node1' % constants.BENCH_DIR, name = '1', memory='4g', jvm_args=' '.join(jmx_args))
+    server.extract(runLogDir)
+    jmx_args = [
+        # '-Dcom.sun.management.jmxremote',
+        #         '-Dcom.sun.management.jmxremote.port=10000',
+        #         '-Dcom.sun.management.jmxremote.authenticate=false',
+        #         '-Dcom.sun.management.jmxremote.ssl=false',
+                '-c', '-z', 'localhost:9983']
+    server2 = SolrServer(tgz, '%s/wiki-1k-schema_cloud_node2' % constants.BENCH_DIR_2, name='2', zk_host='localhost:9983', memory='4g', port='8984')
+    server2.extract(runLogDir)
+    try:
+        bench = JavaBench(os.getcwd())
+        bench.compile(server, runLogDir)
+
+        utils.info('Starting server 1 at port 8983')
+        server.start(runLogDir)
+        time.sleep(5)
+        utils.info('Starting server 2 at port 8984')
+        server2.start(runLogDir)
+        time.sleep(5)
+
+        utils.info('Creating collection')
+        server.create_collection(runLogDir, 'gettingstarted', num_shards='2', replication_factor='1')
+
+        solrMajorVersion, solrImplVersion = server.get_version()
+
+        solrUrl = 'http://%s:%s/solr/gettingstarted' % (server.host, server.port)
+
+        utils.info('Updating schema')
+        schemaApiUrl = '%s/schema' % solrUrl
+        r = requests.post(schemaApiUrl,
+                          data='{"add-field":{"name":"title","type":"string","stored":false, "indexed":true },'
+                               '"add-field":{"name":"titleTokenized","type":"text_en","stored":true, "indexed":true },'
+                               '"add-field":{"name":"body","type":"text_en","stored":false, "indexed":true },'
+                               '"add-field":{"name":"date","type":"date","stored":true, "indexed":true },'
+                               '"add-field":{"name":"timesecnum","type":"tint","stored":false, "indexed":true },'
+                               '"add-copy-field":{"source":"title","dest":[ "titleTokenized"]},'
+                               '"delete-copy-field":{ "source":"*", "dest":"_text_"}}')
+        print r.json()
+
+        logFile = '%s/wiki-1k-schema-cloud.log.txt' % runLogDir
+
+        bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = bench.run('wiki-1k-schema_cloud', server,
+                                                                                  'org.apache.solr.perf.WikiIndexer',
+                                                                                  [
+                                                                                      '-useCloudSolrClient',
+                                                                                      '-zkHost', 'localhost:9983',
+                                                                                      '-collection', 'gettingstarted',
+                                                                                      '-lineDocsFile', constants.WIKI_1K_DATA_FILE,
+                                                                                      '-docCountLimit', '-1',
+                                                                                      '-threadCount', '9',
+                                                                                      '-batchSize', '100'], logFile)
+
+        # if docsIndexed != constants.IMDB_NUM_DOCS:
+        #     raise RuntimeError(
+        #             'Indexed num_docs do not match expected %d != found %d' % (constants.IMDB_NUM_DOCS, docsIndexed))
+
+        timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
+            start.year, start.month, start.day, start.hour, start.minute, start.second)
+        with open(perfFile, 'a+') as f:
+            f.write('%s,%d,%d,%.1f,%s,%s\n' % (
+                timeStampLoggable, bytesIndexed, docsIndexed, indexTimeSec, solrMajorVersion, solrImplVersion))
+
+        write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak)
+
+        return bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak
+    finally:
+        try:
+            server2.stop()
+            time.sleep(5)
+        except:
+            pass
+        server.stop()
+        time.sleep(5)
+
+
 def write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak):
     with open(gcFile, 'a+') as f:
         f.write('%s,%s,%s,' % (timeStampLoggable, solrMajorVersion, solrImplVersion))
@@ -482,6 +579,9 @@ def main():
     if os.path.exists(constants.BENCH_DIR):
         shutil.rmtree(constants.BENCH_DIR)
         os.makedirs(constants.BENCH_DIR)
+    if os.path.exists(constants.BENCH_DIR_2):
+        shutil.rmtree(constants.BENCH_DIR_2)
+        os.makedirs(constants.BENCH_DIR_2)
     if not os.path.exists(constants.NIGHTLY_REPORTS_DIR):
         os.makedirs(constants.NIGHTLY_REPORTS_DIR)
     solr = LuceneSolrCheckout(constants.CHECKOUT_DIR)
@@ -597,6 +697,28 @@ def main():
     wiki4kSchemaIndexDocsSecChartData.sort()
     wiki4kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
+    wiki1kSchemaCloudPerfFile = '%s/wiki_1k_schema_cloud.perfdata.txt' % constants.LOG_BASE_DIR
+    wiki1kCloudGcFile = '%s/wiki_1k_schema_cloud.gc.txt' % constants.LOG_BASE_DIR
+    wiki1kCloudBytesIndexed, wiki1kCloudIndexTimeSec, wiki1kCloudDocsIndexed, \
+    wiki1kCloudTimes, wiki1kCloudGarbage, wiki1kCloudPeak = run_wiki_1k_schema_cloud_bench(start, tgz, runLogDir, wiki1kSchemaCloudPerfFile, wiki1kCloudGcFile)
+
+    wiki1kCloudIndexChartData = []
+    wiki1kCloudIndexDocsSecChartData = []
+    with open(wiki1kSchemaCloudPerfFile, 'r') as f:
+        lines = [line.rstrip('\n') for line in f]
+        for l in lines:
+            timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
+            implVersion = solrImplVersion
+            wiki1kCloudIndexChartData.append(
+                    '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
+            wiki1kCloudIndexDocsSecChartData.append('%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
+
+    wiki1kCloudIndexChartData.sort()
+    wiki1kCloudIndexChartData.insert(0, 'Date,GB/hour')
+
+    wiki1kCloudIndexDocsSecChartData.sort()
+    wiki1kCloudIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
+
     graphutils.writeIndexingHTML(annotations,
                                  simpleIndexChartData,
                                  wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData,
@@ -604,7 +726,8 @@ def main():
                                  wiki1kSchemaGcPeakChartData,
                                  wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
                                  wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData,
-                                 wiki4kSchemaGcPeakChartData)
+                                 wiki4kSchemaGcPeakChartData,
+                                 wiki1kCloudIndexChartData, wiki1kCloudIndexDocsSecChartData)
 
     totalBenchTime = time.time() - t0
     print 'Total bench time: %d seconds' % totalBenchTime
@@ -618,6 +741,7 @@ def main():
                       '\t simple: %.1f json MB/sec\n' \
                       '\t wiki_1k_schema: %.1f GB/hour %.1f k docs/sec\n' \
                       '\t wiki_4k_schema: %.1f GB/hour %.1f k docs/sec\n' \
+                      '\t wiki_1k_schema_cloud: %.1f GB/hour %.1f k docs/sec\n' \
                       '\t See complete report at: %s' \
                       % (implVersion, totalBenchTime, timeStamp,
                                         (int(simpleBytesIndexed) / (1024 * 1024.)) / float(simpleTimeTaken),
@@ -625,6 +749,8 @@ def main():
                          (int(wiki1kDocsIndexed) / 1000) / float(wiki1kIndexTimeSec),
                          (int(wiki4kBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki4kIndexTimeSec) / 3600.),
                          (int(wiki4kDocsIndexed) / 1000) / float(wiki4kIndexTimeSec),
+                         (int(wiki1kCloudBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki1kCloudIndexTimeSec) / 3600.),
+                         (int(wiki1kCloudDocsIndexed) / 1000) / float(wiki1kCloudIndexTimeSec),
                          os.environ.get('SLACK_REPORT_URL'))
             print 'Sending message to slackbot: \n\t\t%s' % message
             r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel), message)
