@@ -260,7 +260,7 @@ class JavaBench:
 
     def get_run_command(self, server, javaExeClass, cmdArgs):
         cmd = ['java']
-        cmd.extend(constants.JVM_CLIENT_PARAMS)
+        cmd.extend(constants.CLIENT_JVM_PARAMS)
         cmd.append('-cp')
         cmd.append('%s:%s' % (self.build_dir(), ':'.join(server.get_jars())))
         cmd.append(javaExeClass)
@@ -490,11 +490,15 @@ def main():
         start.year, start.month, start.day, start.hour, start.minute, start.second)
 
     if SLACK:
-        slackUrl = os.environ.get('SLACK_URL')
-        slackChannel = os.environ.get('SLACK_CHANNEL')
-        slackToken = os.environ.get('SLACK_BOT_TOKEN')
-        r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel), 'Solr performance test started at %s' % timeStamp)
-        print r
+        try:
+            slackUrl = os.environ.get('SLACK_URL')
+            slackChannel = os.environ.get('SLACK_CHANNEL')
+            slackToken = os.environ.get('SLACK_BOT_TOKEN')
+            r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel),
+                              'Solr performance test started at %s' % timeStamp)
+            print r
+        except Exception:
+            print 'Unable to send message to slackbot'
 
     runLogDir = '%s/%s' % (constants.LOG_BASE_DIR, timeStamp)
     os.makedirs(runLogDir)
@@ -605,25 +609,29 @@ def main():
     totalBenchTime = time.time() - t0
     print 'Total bench time: %d seconds' % totalBenchTime
     if SLACK:
-        slackUrl = os.environ.get('SLACK_URL')
-        slackChannel = os.environ.get('SLACK_CHANNEL')
-        slackToken = os.environ.get('SLACK_BOT_TOKEN')
-        message = 'Solr performance test on git sha %s completed in %d seconds:\n' \
-                  '\t Start: %s\n' \
-                  '\t simple: %.1f json MB/sec\n' \
-                  '\t wiki_1k_schema: %.1f GB/hour %.1f k docs/sec\n' \
-                  '\t wiki_4k_schema: %.1f GB/hour %.1f k docs/sec\n' \
-                  '\t See complete report at: %s' \
-                  % (implVersion, totalBenchTime, timeStamp,
-                                    (int(simpleBytesIndexed) / (1024 * 1024.)) / float(simpleTimeTaken),
-                     (int(wiki1kBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki1kIndexTimeSec) / 3600.),
-                     (int(wiki1kDocsIndexed) / 1000) / float(wiki1kIndexTimeSec),
-                     (int(wiki4kBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki4kIndexTimeSec) / 3600.),
-                     (int(wiki4kDocsIndexed) / 1000) / float(wiki4kIndexTimeSec),
-                     os.environ.get('SLACK_REPORT_URL'))
-        r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel), message)
-        print 'slackbot request posted:'
-        print r
+        try:
+            slackUrl = os.environ.get('SLACK_URL')
+            slackChannel = os.environ.get('SLACK_CHANNEL')
+            slackToken = os.environ.get('SLACK_BOT_TOKEN')
+            message = 'Solr performance test on git sha %s completed in %d seconds:\n' \
+                      '\t Start: %s\n' \
+                      '\t simple: %.1f json MB/sec\n' \
+                      '\t wiki_1k_schema: %.1f GB/hour %.1f k docs/sec\n' \
+                      '\t wiki_4k_schema: %.1f GB/hour %.1f k docs/sec\n' \
+                      '\t See complete report at: %s' \
+                      % (implVersion, totalBenchTime, timeStamp,
+                                        (int(simpleBytesIndexed) / (1024 * 1024.)) / float(simpleTimeTaken),
+                         (int(wiki1kBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki1kIndexTimeSec) / 3600.),
+                         (int(wiki1kDocsIndexed) / 1000) / float(wiki1kIndexTimeSec),
+                         (int(wiki4kBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki4kIndexTimeSec) / 3600.),
+                         (int(wiki4kDocsIndexed) / 1000) / float(wiki4kIndexTimeSec),
+                         os.environ.get('SLACK_REPORT_URL'))
+            print 'Sending message to slackbot: \n\t\t%s' % message
+            r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel), message)
+            print 'slackbot request posted:'
+            print r
+        except Exception:
+            print 'Unable to send request to slackbot'
 
 
 def populate_gc_data(gcFile, gcGarbageChartData, gcPeakChartData, gcTimesChartData):
