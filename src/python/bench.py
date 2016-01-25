@@ -32,7 +32,7 @@ KNOWN_CHANGES = [
     ('2016-01-22 17:43',
      'SOLR-8582: /update/json/docs is 4x slower than /update for indexing a list of json docs',
      """
-     Fixed memory leak in JsonRecordReader affecting /update/json/docs. Large payloads cause OOM.
+     SOLR-8582: Fixed memory leak in JsonRecordReader affecting /update/json/docs. Large payloads cause OOM.
      Brings performance on par with /update for large json lists.
      """),
     ('2016-01-23 20:11:11',
