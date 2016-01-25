@@ -145,9 +145,9 @@ def writeIndexingHTML(annotations, simpleIndexChartData,
     w('<h1>Indexing Throughput</h1>\n')
     w('<br>')
     w('<ul>')
-    w('<li><a href="#SimpleSchemalessIndex">IMDB dataset (649MB, 2436442 docs) indexed via bin/post in schemaless mode</a></li>')
+    w('<li><a href="#SimpleSchemalessIndex">IMDB JSON dataset (649MB, 2436442 docs) indexed via bin/post in schemaless mode</a></li>')
 
-    w('<li>~1KB docs from wikipedia (31GB, 33332620 docs)</li>')
+    w('<li>~1KB docs from wikipedia (31GB, 33,332,620 docs)</li>')
     w('<ul>')
     w('<li><a href="#Wiki_1k_Index">GB/hour plain text indexing throughput</a></li>')
     w('<li><a href="#Wiki_1k_Index_Docs_sec">K docs/sec plain text indexing throughput</a></li>')
@@ -156,7 +156,7 @@ def writeIndexingHTML(annotations, simpleIndexChartData,
     w('<li><a href="#Wiki_1k_Peak_memory">Peak memory usage</a></li>')
     w('</ul>')
 
-    w('<li>~4KB docs from wikipedia (29GB, 6726515 docs)</li>')
+    w('<li>~4KB docs from wikipedia (29GB, 6,726,515 docs)</li>')
     w('<ul>')
     w('<li><a href="#Wiki_4k_Index">GB/hour plain text indexing throughput</a></li>')
     w('<li><a href="#Wiki_4k_Index_Docs_sec">K docs/sec plain text indexing throughput</a></li>')
