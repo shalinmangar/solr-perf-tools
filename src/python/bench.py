@@ -636,14 +636,14 @@ def populate_gc_data(gcFile, gcGarbageChartData, gcPeakChartData, gcTimesChartDa
             s = '%s,%.4f,%.4f,%.4f' % (timeStamp, float(jitCompilation), float(youngGenGc), float(oldGenGC))
             gcTimesChartData.append(s)
             s = '%s,%.4f,%.4f,%.4f' % (
-            timeStamp, float(youngGenGarbage), float(survivorGenGarbage), float(oldGenGarbage))
+            timeStamp, float(youngGenGarbage) / 1024., float(survivorGenGarbage) / 1024., float(oldGenGarbage) / 1024.)
             gcGarbageChartData.append(s)
             s = '%s,%.4f,%.4f,%.4f' % (timeStamp, float(youngGenPeak), float(survivorGenPeak), float(oldGenPeak))
             gcPeakChartData.append(s)
     gcTimesChartData.sort()
     gcTimesChartData.insert(0, 'Date,JIT (sec), Young GC (sec), Old GC (sec)')
     gcGarbageChartData.sort()
-    gcGarbageChartData.insert(0, 'Date,Young Garbage (MiB),Survivor Garbage (MiB),Old Garbage (MiB)')
+    gcGarbageChartData.insert(0, 'Date,Young Garbage (GB),Survivor Garbage (GB),Old Garbage (GB)')
     gcPeakChartData.sort()
     gcPeakChartData.insert(0, 'Date,Young Peak (MiB),Survivor Peak (MiB),Old Peak (MiB)')
 
