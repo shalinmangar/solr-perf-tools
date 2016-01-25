@@ -57,6 +57,12 @@ KNOWN_CHANGES = [
      'Client threads decreased from 10 to 9',
      """
      Client threads decreased from 10 to 9
+     """),
+    ('2016-01-25 05:33',
+     'Limit client feeder threads to 1 when using ConcurrentUpdateSolrClient',
+     """
+     When using ConcurrentUpdateSolrClient we limit the feeder threads that read wiki text from file to just
+     1 thread. The SolrJ client continues to use 9 threads to send data to Solr.
      """)
 ]
 
