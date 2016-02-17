@@ -192,7 +192,7 @@ def writeIndexingHTML(annotations, simpleIndexChartData,
     w('\n')
     w('<br>')
     w('<br>')
-    w(getOneGraphHTML(annotations, 'Wiki_1k_Peak_memory', wiki1kSchemaGcPeakChartData, "MiB", "Peak memory usage indexing ~1 KB docs", errorBars=False))
+    w(getOneGraphHTML(annotations, 'Wiki_1k_Peak_memory', wiki1kSchemaGcPeakChartData, "MB", "Peak memory usage indexing ~1 KB docs", errorBars=False))
 
     w('<br>')
     w('<br>')
@@ -212,7 +212,7 @@ def writeIndexingHTML(annotations, simpleIndexChartData,
     w('\n')
     w('<br>')
     w('<br>')
-    w(getOneGraphHTML(annotations, 'Wiki_4k_Peak_memory', wiki4kSchemaGcPeakChartData, "MiB", "Peak memory usage indexing ~4 KB docs", errorBars=False))
+    w(getOneGraphHTML(annotations, 'Wiki_4k_Peak_memory', wiki4kSchemaGcPeakChartData, "MB", "Peak memory usage indexing ~4 KB docs", errorBars=False))
 
     w('<br>')
     w('<br>')

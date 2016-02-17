@@ -782,7 +782,7 @@ def populate_gc_data(gcFile, gcGarbageChartData, gcPeakChartData, gcTimesChartDa
     gcGarbageChartData.sort()
     gcGarbageChartData.insert(0, 'Date,Young Garbage (GB),Survivor Garbage (GB),Old Garbage (GB)')
     gcPeakChartData.sort()
-    gcPeakChartData.insert(0, 'Date,Young Peak (MiB),Survivor Peak (MiB),Old Peak (MiB)')
+    gcPeakChartData.insert(0, 'Date,Young Peak (MB),Survivor Peak (MB),Old Peak (MB)')
 
 
 if __name__ == '__main__':
