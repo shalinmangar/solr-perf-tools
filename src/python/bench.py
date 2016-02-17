@@ -100,7 +100,10 @@ class LuceneSolrCheckout:
             os.chdir(x)
 
     def updateToRevision(self, runLogDir):
+        # resets any staged changes (there shouldn't be any though)
         utils.runCommand('%s reset --hard' % constants.GIT_EXE)
+        # clean ANY files not tracked in the repo -- this effectively restores pristine state
+        utils.runCommand('%s clean -xfd .' % constants.GIT_EXE)
         if self.revision == 'LATEST':
             utils.runCommand('%s pull > %s/update.log.txt 2>&1' % (constants.GIT_EXE, runLogDir))
         else:
