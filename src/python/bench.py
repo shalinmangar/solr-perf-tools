@@ -345,9 +345,9 @@ def run_wiki_schemaless_bench(start, tgz, runLogDir, perfFile, gcFile):
                                                              '-threadCount', '9',
                                                              '-batchSize', '100'], logFile)
 
-        # if docsIndexed != constants.IMDB_NUM_DOCS:
-        #     raise RuntimeError(
-        #             'Indexed num_docs do not match expected %d != found %d' % (constants.IMDB_NUM_DOCS, docsIndexed))
+        if docsIndexed != constants.WIKI_1K_NUM_DOCS:
+            raise RuntimeError(
+                    'Indexed num_docs do not match expected %d != found %d' % (constants.WIKI_1K_NUM_DOCS, docsIndexed))
         timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
             start.year, start.month, start.day, start.hour, start.minute, start.second)
         with open(perfFile, 'a+') as f:
@@ -402,9 +402,9 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                                                                 '-threadCount', '9',
                                                                 '-batchSize', '100'], logFile)
 
-        # if docsIndexed != constants.IMDB_NUM_DOCS:
-        #     raise RuntimeError(
-        #             'Indexed num_docs do not match expected %d != found %d' % (constants.IMDB_NUM_DOCS, docsIndexed))
+        if docsIndexed != constants.WIKI_1K_NUM_DOCS:
+            raise RuntimeError(
+                    'Indexed num_docs do not match expected %d != found %d' % (constants.WIKI_1K_NUM_DOCS, docsIndexed))
         timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
             start.year, start.month, start.day, start.hour, start.minute, start.second)
         with open(perfFile, 'a+') as f:
@@ -460,9 +460,9 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                                                                 '-threadCount', '9',
                                                                 '-batchSize', '100'], logFile)
 
-        # if docsIndexed != constants.IMDB_NUM_DOCS:
-        #     raise RuntimeError(
-        #             'Indexed num_docs do not match expected %d != found %d' % (constants.IMDB_NUM_DOCS, docsIndexed))
+        if docsIndexed != constants.WIKI_4k_NUM_DOCS:
+            raise RuntimeError(
+                    'Indexed num_docs do not match expected %d != found %d' % (constants.WIKI_4k_NUM_DOCS, docsIndexed))
 
         timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
             start.year, start.month, start.day, start.hour, start.minute, start.second)
@@ -539,9 +539,9 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogDir, perfFile, gcFile):
                                                                                       '-threadCount', '9',
                                                                                       '-batchSize', '100'], logFile)
 
-        # if docsIndexed != constants.IMDB_NUM_DOCS:
-        #     raise RuntimeError(
-        #             'Indexed num_docs do not match expected %d != found %d' % (constants.IMDB_NUM_DOCS, docsIndexed))
+        if docsIndexed != constants.WIKI_1K_NUM_DOCS:
+            raise RuntimeError(
+                    'Indexed num_docs do not match expected %d != found %d' % (constants.WIKI_1K_NUM_DOCS, docsIndexed))
 
         timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
             start.year, start.month, start.day, start.hour, start.minute, start.second)
