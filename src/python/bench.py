@@ -63,6 +63,12 @@ KNOWN_CHANGES = [
      """
      When using ConcurrentUpdateSolrClient we limit the feeder threads that read wiki text from file to just
      1 thread. The SolrJ client continues to use 9 threads to send data to Solr.
+     """),
+    ('2016-03-16',
+     'SOLR-8740: use docValues by default',
+     """
+     docValues are now enabled by default for most non-text (string, date, and numeric) fields in
+     the schema templates
      """)
 ]
 
