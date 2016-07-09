@@ -10,8 +10,8 @@
     <packaging>jar</packaging>
 
     <properties>
-        <solr.version>5.4.0</solr.version>
-        <solr.maven.version>5.4.0</solr.maven.version>
+        <solr.version>5.5.1</solr.version>
+        <solr.maven.version>5.5.1</solr.maven.version>
     </properties>
 
     <dependencies>
