@@ -1,7 +1,7 @@
 # solr-perf-tools
 Performance benchmarking utilities for Apache Solr
 
-Inspired by Lucene benchmarks hosted at https://people.apache.org/~mikemccand/lucenebench/
+Inspired by Lucene benchmarks hosted at https://home.apache.org/~mikemccand/lucenebench/
 
 ## Setup
 
@@ -15,9 +15,9 @@ Make sure your system has the following installed and in your path:
 ## Configuring
 
 The benchmark requires a few directories to be available:
-1. TEST_BASE_DIR_1 (defaults to ``/solr-bench`)
-2. TEST_BASE_DIR_2 (defaults to ``/solr-bench2`)
-3. DATA_BASE_DIR (defaults to ``/solr-data`)
+* TEST_BASE_DIR_1 (defaults to ``/solr-bench`)
+* TEST_BASE_DIR_2 (defaults to ``/solr-bench2`)
+* DATA_BASE_DIR (defaults to ``/solr-data`)
 
 You can change the location of the above directories by editing the `src/python/constants.py` file.
 
@@ -39,7 +39,7 @@ use a 600MB JSON file containing approximately 2.4M documents.
 
 The wiki-4k test data is a variant of wiki-1k where each document is a 4KB in size.
 
-The location of all the above files are configured in src/python/constants.py along with the number of documents
+The location of all the above files are configured in `src/python/constants.py` along with the number of documents
 that each of them contain. This information is used for verification of full indexation at the end of the run.
 
 ## Tests
