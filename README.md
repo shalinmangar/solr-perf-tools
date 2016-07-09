@@ -6,11 +6,11 @@ Inspired by Lucene benchmarks hosted at https://home.apache.org/~mikemccand/luce
 ## Setup
 
 Make sure your system has the following installed and in your path:
-1. python 2.7.x+
-2. java 8
-3. git
-4. ant
-5. [python requests module](http://docs.python-requests.org/en/master/user/install/)
+* python 2.7.x+
+* java 8
+* git
+* ant
+* [python requests module](http://docs.python-requests.org/en/master/user/install/)
 
 ## Configuring
 
