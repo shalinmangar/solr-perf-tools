@@ -67,7 +67,7 @@ With slack integration enabled:
 * Logs can be found at `$TEST_BASE_DIR_1/logs`  (`/solr-bench/logs`)
 * The solr checkout is at `$TEST_BASE_DIR_1/checkout` (`/solr-bench/checkout`)
 * The solr instance(s) used for benchmarks are at `TEST_BASE_DIR_1/solr` and `TEST_BASE_DIR_2/solr`
-..* The instance directories will have the fully built indexes at the end of the benchmark
+  * The instance directories will have the fully built indexes at the end of the benchmark
 
 ## How it works
 
