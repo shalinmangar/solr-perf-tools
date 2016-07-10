@@ -15,9 +15,9 @@ Make sure your system has the following installed and in your path:
 ## Configuring
 
 The benchmark requires a few directories to be available:
-* TEST_BASE_DIR_1 (defaults to ``/solr-bench`)
-* TEST_BASE_DIR_2 (defaults to ``/solr-bench2`)
-* DATA_BASE_DIR (defaults to ``/solr-data`)
+* TEST_BASE_DIR_1 (defaults to `/solr-bench`)
+* TEST_BASE_DIR_2 (defaults to `/solr-bench2`)
+* DATA_BASE_DIR (defaults to `/solr-data`)
 
 You can change the location of the above directories by editing the `src/python/constants.py` file.
 
