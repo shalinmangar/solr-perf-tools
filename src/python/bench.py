@@ -112,7 +112,7 @@ class LuceneSolrCheckout:
         # clean ANY files not tracked in the repo -- this effectively restores pristine state
         utils.runCommand('%s clean -xfd .' % constants.GIT_EXE)
         if self.revision == 'LATEST':
-            utils.runCommand('%s pull > %s/update.log.txt 2>&1' % (constants.GIT_EXE, runLogDir))
+            utils.runCommand('%s pull origin master > %s/update.log.txt 2>&1' % (constants.GIT_EXE, runLogDir))
         else:
             utils.runCommand('%s checkout %s > %s/update.log.txt 2>&1' % (constants.GIT_EXE, self.revision, runLogDir))
 
@@ -597,7 +597,14 @@ def main():
         os.makedirs(constants.BENCH_DIR_2)
     if not os.path.exists(constants.NIGHTLY_REPORTS_DIR):
         os.makedirs(constants.NIGHTLY_REPORTS_DIR)
-    solr = LuceneSolrCheckout(constants.CHECKOUT_DIR)
+
+    solr = None
+    if '-revision' in sys.argv:
+        index = sys.argv.index('-revision')
+        revision = sys.argv[index + 1]
+        solr = LuceneSolrCheckout(constants.CHECKOUT_DIR, revision)
+    else:
+        solr = LuceneSolrCheckout(constants.CHECKOUT_DIR)
     start = datetime.datetime.now()
     timeStamp = '%04d.%02d.%02d.%02d.%02d.%02d' % (
         start.year, start.month, start.day, start.hour, start.minute, start.second)
