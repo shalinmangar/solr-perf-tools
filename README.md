@@ -61,6 +61,10 @@ Without slack integration:
 With slack integration enabled:
 `python src/python/bench.py -enable-slack-bot`
 
+Other supported command line arguments are:
+'-no-report' to disable report generation
+'-revision GIT_SHA' to run tests on a particular git sha instead of latest master
+
 ## Output
 
 * Reports can be found at `$TEST_BASE_DIR_1/reports` (`/solr-bench/reports`)
