@@ -62,8 +62,8 @@ With slack integration enabled:
 `python src/python/bench.py -enable-slack-bot`
 
 Other supported command line arguments are:
-'-no-report' to disable report generation
-'-revision GIT_SHA' to run tests on a particular git sha instead of latest master
+* '-no-report' to disable report generation
+* '-revision GIT_SHA' to run tests on a particular git sha instead of latest master
 
 ## Output
 
