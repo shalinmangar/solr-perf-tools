@@ -18,12 +18,14 @@ IMDB_NUM_DOCS = 2436442
 WIKI_1K_DATA_FILE = '%s/enwiki-20120502-lines-1k.txt' % DATA_BASE_DIR
 WIKI_1K_NUM_DOCS = 33332620
 # WIKI_1K_DATA_FILE = '%s/small-enwiki-20120502-lines-1k.txt' % DATA_BASE_DIR
+# WIKI_1K_NUM_DOCS = 9
 # WIKI_1K_DATA_FILE = '%s/enwiki.random.lines.txt' % DATA_BASE_DIR
 
 WIKI_4K_DATA_FILE = '%s/enwiki-20120502-lines.txt' % DATA_BASE_DIR
 WIKI_4k_NUM_DOCS = 6726515
 # WIKI_4K_DATA_FILE = '%s/enwiki.random.lines.txt' % DATA_BASE_DIR
 # WIKI_4K_DATA_FILE = '%s/small-4k-wiki-lines.txt' % DATA_BASE_DIR
+# WIKI_4k_NUM_DOCS = 999
 
 ZOOKEEPER_TAR_GZ = '%s/zookeeer-3.4.6.tar.gz' % DATA_BASE_DIR
 
