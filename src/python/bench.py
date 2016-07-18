@@ -27,6 +27,7 @@ reGarbageIn = re.compile('^\s*Garbage Generated in (.*?): (.*) MiB$')
 rePeakUsage = re.compile('^\s*Peak usage in (.*?): (.*) MiB')
 
 SLACK = '-enable-slack-bot' in sys.argv and 'SLACK_BOT_TOKEN' in os.environ
+NOREPORT = '-no-report' in sys.argv
 
 KNOWN_CHANGES = [
     ('2016-01-22 17:43',
@@ -240,11 +241,12 @@ def run_simple_bench(start, tgz, runLogDir, perfFile):
                     'Indexed num_docs do not match expected %d != found %d' % (constants.IMDB_NUM_DOCS, docsIndexed))
 
         print '      %.1f s' % (t1)
-        with open(perfFile, 'a+') as f:
-            timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
-                start.year, start.month, start.day, start.hour, start.minute, start.second)
-            f.write('%s,%d,%d,%.1f,%s,%s\n' % (
-                timeStampLoggable, bytesIndexed, docsIndexed, t1, solrMajorVersion, solrImplVersion))
+        if not NOREPORT:
+            with open(perfFile, 'a+') as f:
+                timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
+                    start.year, start.month, start.day, start.hour, start.minute, start.second)
+                f.write('%s,%d,%d,%.1f,%s,%s\n' % (
+                    timeStampLoggable, bytesIndexed, docsIndexed, t1, solrMajorVersion, solrImplVersion))
 
         return bytesIndexed, docsIndexed, t1
     finally:
@@ -413,11 +415,12 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                     'Indexed num_docs do not match expected %d != found %d' % (constants.WIKI_1K_NUM_DOCS, docsIndexed))
         timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
             start.year, start.month, start.day, start.hour, start.minute, start.second)
-        with open(perfFile, 'a+') as f:
-            f.write('%s,%d,%d,%.1f,%s,%s\n' % (
-                timeStampLoggable, bytesIndexed, docsIndexed, indexTimeSec, solrMajorVersion, solrImplVersion))
+        if not NOREPORT:
+            with open(perfFile, 'a+') as f:
+                f.write('%s,%d,%d,%.1f,%s,%s\n' % (
+                    timeStampLoggable, bytesIndexed, docsIndexed, indexTimeSec, solrMajorVersion, solrImplVersion))
 
-        write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak)
+            write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak)
         return bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak
     finally:
         server.stop()
@@ -472,11 +475,11 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
 
         timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
             start.year, start.month, start.day, start.hour, start.minute, start.second)
-        with open(perfFile, 'a+') as f:
-            f.write('%s,%d,%d,%.1f,%s,%s\n' % (
-                timeStampLoggable, bytesIndexed, docsIndexed, indexTimeSec, solrMajorVersion, solrImplVersion))
-
-        write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak)
+        if not NOREPORT:
+            with open(perfFile, 'a+') as f:
+                f.write('%s,%d,%d,%.1f,%s,%s\n' % (
+                    timeStampLoggable, bytesIndexed, docsIndexed, indexTimeSec, solrMajorVersion, solrImplVersion))
+            write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak)
 
         return bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak
     finally:
@@ -551,11 +554,11 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogDir, perfFile, gcFile):
 
         timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
             start.year, start.month, start.day, start.hour, start.minute, start.second)
-        with open(perfFile, 'a+') as f:
-            f.write('%s,%d,%d,%.1f,%s,%s\n' % (
-                timeStampLoggable, bytesIndexed, docsIndexed, indexTimeSec, solrMajorVersion, solrImplVersion))
-
-        write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak)
+        if not NOREPORT:
+            with open(perfFile, 'a+') as f:
+                f.write('%s,%d,%d,%.1f,%s,%s\n' % (
+                    timeStampLoggable, bytesIndexed, docsIndexed, indexTimeSec, solrMajorVersion, solrImplVersion))
+            write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak)
 
         return bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak
     finally:
@@ -584,6 +587,7 @@ def write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, 
         f.write('\n')
 
 def main():
+    utils.info('Running solr benchmarks with parameter: %s' % sys.argv)
     t0 = time.time()
     if os.path.exists(constants.BENCH_DIR):
         shutil.rmtree(constants.BENCH_DIR)
@@ -728,18 +732,19 @@ def main():
     wiki1kCloudIndexDocsSecChartData.sort()
     wiki1kCloudIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
-    graphutils.writeIndexingHTML(annotations,
-                                 simpleIndexChartData,
-                                 wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData,
-                                 wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData,
-                                 wiki1kSchemaGcPeakChartData,
-                                 wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
-                                 wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData,
-                                 wiki4kSchemaGcPeakChartData,
-                                 wiki1kCloudIndexChartData, wiki1kCloudIndexDocsSecChartData)
+    if not NOREPORT:
+        graphutils.writeIndexingHTML(annotations,
+                                     simpleIndexChartData,
+                                     wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData,
+                                     wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData,
+                                     wiki1kSchemaGcPeakChartData,
+                                     wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
+                                     wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData,
+                                     wiki4kSchemaGcPeakChartData,
+                                     wiki1kCloudIndexChartData, wiki1kCloudIndexDocsSecChartData)
 
     totalBenchTime = time.time() - t0
-    print 'Total bench time: %d seconds' % totalBenchTime
+    utils.info('Total bench time: %d seconds' % totalBenchTime)
     if SLACK:
         try:
             slackUrl = os.environ.get('SLACK_URL')
