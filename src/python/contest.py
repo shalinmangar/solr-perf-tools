@@ -76,8 +76,8 @@ def main():
     r1 = []
     r2 = []
     for x in range(0, iters):
-        r1.append(results1[x])
-        r2.append(results2[x])
+        r1.append(results1[x][2])
+        r2.append(results2[x][2])
 
     utils.info('Sorted Run times for %s: %s' % (revision1, r1.sort()))
     utils.info('Sorted Run times for %s: %s' % (revision2, r2.sort()))
