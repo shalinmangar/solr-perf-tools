@@ -51,7 +51,7 @@ that each of them contain. This information is used for verification of full ind
 For both wiki-1k and wiki-4k, we start Solr with schemaless configs and then use the Config API to explicitly
 add the required fields and disable the _text_ copy field (to avoid duplicate indexing of text body)
 
-## Running
+## Running Benchmarks
 
 Running is easy!
 
@@ -64,6 +64,15 @@ With slack integration enabled:
 Other supported command line arguments are:
 * '-no-report' to disable report generation
 * '-revision GIT_SHA' to run tests on a particular git sha instead of latest master
+
+## Running Contest
+
+`python src/python/contest.py -revision1 git_sha_here -revision2 git_sha_here -iters 10`
+
+This will run the simple json indexing benchmarks the specified number of times against the two given git commit SHA
+and output the runtimes for each sha sorted from low to high.
+
+This script is fairly basic at this time.
 
 ## Output
 
