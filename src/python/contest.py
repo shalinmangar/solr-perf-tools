@@ -60,7 +60,7 @@ def main():
     for i in range(0, iters):
         simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken = run_test(start, revision1, tgz1, runLogDir1)
         results1.append((simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken))
-        utils.info('Attempt #%s - %d %d %.1f' % (str(i), simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken))
+        utils.info('Iter #%s - %d %d %.1f' % (str(i), simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken))
         if os.path.exists(constants.BENCH_DIR):
             shutil.rmtree(constants.BENCH_DIR)
         os.makedirs(constants.BENCH_DIR)
@@ -68,16 +68,19 @@ def main():
     for i in range(0, iters):
         simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken = run_test(start, revision2, tgz2, runLogDir2)
         results2.append((simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken))
-        utils.info('Attempt #%s - %d %d %.1f' % (str(i), simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken))
+        utils.info('Iter #%s - %d %d %.1f' % (str(i), simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken))
         if os.path.exists(constants.BENCH_DIR):
             shutil.rmtree(constants.BENCH_DIR)
         os.makedirs(constants.BENCH_DIR)
 
-    utils.info('#######################################')
+    r1 = []
+    r2 = []
     for x in range(0, iters):
-        r1 = results1[x]
-        r2 = results2[x]
-        utils.info('Attempt %d - %.1f \t %.1f \t %.1f' % (x, r1[2], r2[2], r2[2] - r1[2]))
+        r1.append(results1[x])
+        r2.append(results2[x])
+
+    utils.info('Sorted Run times for %s: %s' % (revision1, r1.sort()))
+    utils.info('Sorted Run times for %s: %s' % (revision2, r2.sort()))
 
     totalBenchTime = time.time() - t0
     utils.info('Total bench time: %d seconds' % totalBenchTime)
