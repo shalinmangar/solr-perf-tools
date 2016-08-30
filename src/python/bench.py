@@ -70,6 +70,12 @@ KNOWN_CHANGES = [
      """
      docValues are now enabled by default for most non-text (string, date, and numeric) fields in
      the schema templates
+     """),
+    ('2016-08-29',
+     'SOLR-9449: Example schemas do not index _version_ field anymore because the field has DocValues enabled already',
+     """
+     SOLR-8740 had enabled doc values for long types by default. Since then, the _version_ field was both indexed
+     and had doc values. SOLR-9449 stopped indexing the _version_ field since doc values are already enabled.
      """)
 ]
 
