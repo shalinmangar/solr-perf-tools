@@ -76,6 +76,13 @@ KNOWN_CHANGES = [
      """
      SOLR-8740 had enabled doc values for long types by default. Since then, the _version_ field was both indexed
      and had doc values. SOLR-9449 stopped indexing the _version_ field since doc values are already enabled.
+     """),
+    ('2016-08-31',
+     'SOLR-9452: JsonRecordReader should not deep copy document before handler.handle()',
+     """
+     JsonRecordReader used to make a deep copy of the document map which was only required for very specialized
+     methods. This deep copy has been removed to optimize the common case. This change only affects JSON indexing
+     and therefore only the IMDB benchmark.
      """)
 ]
 
