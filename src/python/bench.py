@@ -106,11 +106,11 @@ class LuceneSolrCheckout:
                 # clone
                 if self.revision == 'LATEST':
                     utils.runCommand(
-                            '%s clone --progress http://git-wip-us.apache.org/repos/asf/lucene-solr.git . > %s/checkout.log.txt 2>&1' % (
+                            '%s clone --progress http://git.apache.org/repos/asf/lucene-solr.git . > %s/checkout.log.txt 2>&1' % (
                                 constants.GIT_EXE, runLogDir))
                 else:
                     utils.runCommand(
-                            '%s clone --progress http://git-wip-us.apache.org/repos/asf/lucene-solr.git .  > %s/checkout.log.txt 2>&1' % (
+                            '%s clone --progress http://git.apache.org/repos/asf/lucene-solr.git .  > %s/checkout.log.txt 2>&1' % (
                                 constants.GIT_EXE, runLogDir))
                     self.updateToRevision(runLogDir)
                 utils.runCommand('%s ivy-bootstrap' % constants.ANT_EXE)
