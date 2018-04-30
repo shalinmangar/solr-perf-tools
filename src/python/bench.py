@@ -113,7 +113,10 @@ class LuceneSolrCheckout:
                             '%s clone --progress %s .  > %s/checkout.log.txt 2>&1' % (
                                 constants.GIT_EXE, constants.GIT_REPO, runLogDir))
                     self.updateToRevision(runLogDir)
-                utils.runCommand('rm -r ~/.ant/lib/ivy-2.3.0.jar')
+                try:
+                    utils.runCommand('rm -r ~/.ant/lib/ivy-*.jar')
+                except:
+                    print('Unable to remove previous ivy-2.3.0.jar')
                 utils.runCommand('%s ivy-bootstrap' % constants.ANT_EXE)
             else:
                 self.updateToRevision(runLogDir)
@@ -234,7 +237,7 @@ def run_simple_bench(start, tgz, runLogDir, perfFile):
     server.extract(runLogDir)
     try:
         server.start(runLogDir)
-        time.sleep(5)
+        time.sleep(10)
 
         solrMajorVersion, solrImplVersion = server.get_version()
         cmd = ['%s/bin/post' % server.extract_dir, '-c', constants.SOLR_COLLECTION_NAME, constants.IMDB_DATA_FILE]
@@ -265,7 +268,7 @@ def run_simple_bench(start, tgz, runLogDir, perfFile):
         return bytesIndexed, docsIndexed, t1
     finally:
         server.stop()
-        time.sleep(5)
+        time.sleep(10)
 
 
 class JavaBench:
@@ -349,7 +352,7 @@ def run_wiki_schemaless_bench(start, tgz, runLogDir, perfFile, gcFile):
         bench.compile(server, runLogDir)
 
         server.start(runLogDir)
-        time.sleep(5)
+        time.sleep(10)
 
         solrMajorVersion, solrImplVersion = server.get_version()
 
@@ -378,7 +381,7 @@ def run_wiki_schemaless_bench(start, tgz, runLogDir, perfFile, gcFile):
         write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak)
     finally:
         server.stop()
-        time.sleep(5)
+        time.sleep(10)
 
 
 def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
@@ -394,7 +397,7 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
         bench.compile(server, runLogDir)
 
         server.start(runLogDir)
-        time.sleep(5)
+        time.sleep(10)
 
         solrMajorVersion, solrImplVersion = server.get_version()
 
@@ -438,7 +441,7 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
         return bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak
     finally:
         server.stop()
-        time.sleep(5)
+        time.sleep(10)
 
 def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
     # we start in schemaless mode but use the schema api to add the right fields
@@ -453,7 +456,7 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
         bench.compile(server, runLogDir)
 
         server.start(runLogDir)
-        time.sleep(5)
+        time.sleep(10)
 
         solrMajorVersion, solrImplVersion = server.get_version()
 
@@ -498,7 +501,7 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
         return bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak
     finally:
         server.stop()
-        time.sleep(5)
+        time.sleep(10)
 
 
 def run_wiki_1k_schema_cloud_bench(start, tgz, runLogDir, perfFile, gcFile):
@@ -525,10 +528,10 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogDir, perfFile, gcFile):
 
         utils.info('Starting server 1 at port 8983')
         server.start(runLogDir)
-        time.sleep(5)
+        time.sleep(10)
         utils.info('Starting server 2 at port 8984')
         server2.start(runLogDir)
-        time.sleep(5)
+        time.sleep(10)
 
         utils.info('Creating collection')
         server.create_collection(runLogDir, 'gettingstarted', num_shards='2', replication_factor='1')
@@ -578,11 +581,11 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogDir, perfFile, gcFile):
     finally:
         try:
             server2.stop()
-            time.sleep(5)
+            time.sleep(10)
         except:
             pass
         server.stop()
-        time.sleep(5)
+        time.sleep(10)
 
 
 def write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak):
