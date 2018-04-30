@@ -113,6 +113,7 @@ class LuceneSolrCheckout:
                             '%s clone --progress %s .  > %s/checkout.log.txt 2>&1' % (
                                 constants.GIT_EXE, constants.GIT_REPO, runLogDir))
                     self.updateToRevision(runLogDir)
+                utils.runCommand('rm -r ~/.ant/lib/ivy-2.3.0.jar')
                 utils.runCommand('%s ivy-bootstrap' % constants.ANT_EXE)
             else:
                 self.updateToRevision(runLogDir)
@@ -253,7 +254,7 @@ def run_simple_bench(start, tgz, runLogDir, perfFile):
             raise RuntimeError(
                     'Indexed num_docs do not match expected %d != found %d' % (constants.IMDB_NUM_DOCS, docsIndexed))
 
-        print '      %.1f s' % (t1)
+        print ('      %.1f s' % (t1))
         if not NOREPORT:
             with open(perfFile, 'a+') as f:
                 timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
@@ -409,7 +410,7 @@ def run_wiki_1k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                                '"add-field":{"name":"timesecnum","type":"tint","stored":false, "indexed":true },'
                                '"add-copy-field":{"source":"title","dest":[ "titleTokenized"]},'
                                '"delete-copy-field":{ "source":"*", "dest":"_text_"}}')
-        print r.json()
+        print(r.json())
 
         logFile = '%s/wiki-1k-schema.log.txt' % runLogDir
 
@@ -468,7 +469,7 @@ def run_wiki_4k_schema_bench(start, tgz, runLogDir, perfFile, gcFile):
                                '"add-field":{"name":"timesecnum","type":"tint","stored":false, "indexed":true },'
                                '"add-copy-field":{"source":"title","dest":[ "titleTokenized"]},'
                                '"delete-copy-field":{ "source":"*", "dest":"_text_"}}')
-        print r.json()
+        print(r.json())
 
         logFile = '%s/wiki-4k-schema.log.txt' % runLogDir
 
@@ -546,7 +547,7 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogDir, perfFile, gcFile):
                                '"add-field":{"name":"timesecnum","type":"tint","stored":false, "indexed":true },'
                                '"add-copy-field":{"source":"title","dest":[ "titleTokenized"]},'
                                '"delete-copy-field":{ "source":"*", "dest":"_text_"}}')
-        print r.json()
+        print(r.json())
 
         logFile = '%s/wiki-1k-schema-cloud.log.txt' % runLogDir
 
@@ -629,9 +630,9 @@ def main():
             slackToken = os.environ.get('SLACK_BOT_TOKEN')
             r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel),
                               'Solr performance test started at %s' % timeStamp)
-            print r
+            print(r)
         except Exception:
-            print 'Unable to send message to slackbot'
+            print('Unable to send message to slackbot')
 
     runLogDir = '%s/%s' % (constants.LOG_BASE_DIR, timeStamp)
     os.makedirs(runLogDir)
@@ -786,12 +787,12 @@ def main():
                          (int(wiki1kCloudBytesIndexed) / (1024 * 1024 * 1024.)) / (float(wiki1kCloudIndexTimeSec) / 3600.),
                          (int(wiki1kCloudDocsIndexed) / 1000) / float(wiki1kCloudIndexTimeSec),
                          os.environ.get('SLACK_REPORT_URL'))
-            print 'Sending message to slackbot: \n\t\t%s' % message
+            print('Sending message to slackbot: \n\t\t%s' % message)
             r = requests.post('%s?token=%s&channel=%s' % (slackUrl, slackToken, slackChannel), message)
-            print 'slackbot request posted:'
-            print r
+            print('slackbot request posted:')
+            print(r)
         except Exception:
-            print 'Unable to send request to slackbot'
+            print('Unable to send request to slackbot')
 
 
 def populate_gc_data(gcFile, gcGarbageChartData, gcPeakChartData, gcTimesChartData):
