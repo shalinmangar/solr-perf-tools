@@ -9,7 +9,7 @@ import requests
 
 
 def info(message):
-    print '[%s] %s' % (datetime.datetime.now(), message)
+    print('[%s] %s' % (datetime.datetime.now(), message))
 
 
 def get_solr_version():
@@ -45,9 +45,9 @@ def runComand(name, command, log):
         f.flush()
     f.close()
     if p.wait() != 0:
-        print
-        print 'Command %s FAILED:' % name
+        print()
+        print('Command %s FAILED:' % name)
         s = open(log, 'r')
         for line in s.readlines():
-            print line.rstrip()
+            print(line.rstrip())
         raise RuntimeError('%s failed; see log %s' % (name, log))
