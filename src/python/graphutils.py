@@ -134,12 +134,16 @@ def writeKnownChanges(annotations, w):
     w('</ul>')
 
 
-def writeIndexingHTML(annotations, simpleIndexChartData,
-                      wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData,
-                      wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData, wiki1kSchemaGcPeakChartData,
-                      wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
-                      wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData,
-                      wiki1kCloudIndexChartData, wiki1kCloudIndexDocsSecChartData):
+def writeIndexingHTML(annotations, chart_data):
+    simpleIndexChartData, \
+    wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData, \
+    wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData, wiki1kSchemaGcPeakChartData, \
+    wiki1kCloudIndexChartData, wiki1kCloudIndexDocsSecChartData = chart_data
+
+    # unused today
+    # wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData, \
+    # wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData, \
+
     f = open('%s/indexing.html' % constants.NIGHTLY_REPORTS_DIR, 'wb')
     w = f.write
     header(w, 'Solr nightly indexing benchmark')
@@ -194,25 +198,25 @@ def writeIndexingHTML(annotations, simpleIndexChartData,
     w('<br>')
     w(getOneGraphHTML(annotations, 'Wiki_1k_Peak_memory', wiki1kSchemaGcPeakChartData, "MB", "Peak memory usage indexing ~1 KB docs", errorBars=False))
 
-    w('<br>')
-    w('<br>')
-    w(getOneGraphHTML(annotations, 'Wiki_4k_Index', wiki4kSchemaIndexChartData, "GB/hour", "~4 KB Wikipedia English docs",
-                      errorBars=False))
-    w('<br>')
-    w('<br>')
-    w(getOneGraphHTML(annotations, 'Wiki_4k_Index_Docs_sec', wiki4kSchemaIndexDocsSecChartData, "k docs/sec", "~4 KB Wikipedia English docs",
-                      errorBars=False))
-    w('<br>')
-    w('<br>')
-    w(getOneGraphHTML(annotations, 'Wiki_4k_GCTimes', wiki4kSchemaGcTimesChartData, "Seconds", "JIT/GC times indexing ~4 KB docs", errorBars=False))
-    w('\n')
-    w('<br>')
-    w('<br>')
-    w(getOneGraphHTML(annotations, 'Wiki_4k_Garbage', wiki4kSchemaGcGarbageChartData, "GB", "Garbage created indexing ~4 KB docs", errorBars=False))
-    w('\n')
-    w('<br>')
-    w('<br>')
-    w(getOneGraphHTML(annotations, 'Wiki_4k_Peak_memory', wiki4kSchemaGcPeakChartData, "MB", "Peak memory usage indexing ~4 KB docs", errorBars=False))
+    # w('<br>')
+    # w('<br>')
+    # w(getOneGraphHTML(annotations, 'Wiki_4k_Index', wiki4kSchemaIndexChartData, "GB/hour", "~4 KB Wikipedia English docs",
+    #                   errorBars=False))
+    # w('<br>')
+    # w('<br>')
+    # w(getOneGraphHTML(annotations, 'Wiki_4k_Index_Docs_sec', wiki4kSchemaIndexDocsSecChartData, "k docs/sec", "~4 KB Wikipedia English docs",
+    #                   errorBars=False))
+    # w('<br>')
+    # w('<br>')
+    # w(getOneGraphHTML(annotations, 'Wiki_4k_GCTimes', wiki4kSchemaGcTimesChartData, "Seconds", "JIT/GC times indexing ~4 KB docs", errorBars=False))
+    # w('\n')
+    # w('<br>')
+    # w('<br>')
+    # w(getOneGraphHTML(annotations, 'Wiki_4k_Garbage', wiki4kSchemaGcGarbageChartData, "GB", "Garbage created indexing ~4 KB docs", errorBars=False))
+    # w('\n')
+    # w('<br>')
+    # w('<br>')
+    # w(getOneGraphHTML(annotations, 'Wiki_4k_Peak_memory', wiki4kSchemaGcPeakChartData, "MB", "Peak memory usage indexing ~4 KB docs", errorBars=False))
 
     w('<br>')
     w('<br>')
