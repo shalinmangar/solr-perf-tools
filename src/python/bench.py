@@ -503,8 +503,15 @@ def run_wiki_4k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
         server.stop()
         time.sleep(10)
 
+def create_collection_2x1(server, runLogFile):
+    utils.info('Creating collection 2x1')
+    server.create_collection(runLogFile, 'gettingstarted', num_shards='2', replication_factor='1')
 
-def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile):
+def create_collection_1x2(server, runLogFile):
+    utils.info('Creating collection 1x2')
+    server.create_collection(runLogFile, 'gettingstarted', num_shards='1', replication_factor='2')
+
+def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile, collection_function):
     # we start in schemaless mode but use the schema api to add the right fields
     jmx_args = [
         # '-Dcom.sun.management.jmxremote',
@@ -533,8 +540,7 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile):
         server2.start(runLogFile)
         time.sleep(10)
 
-        utils.info('Creating collection')
-        server.create_collection(runLogFile, 'gettingstarted', num_shards='2', replication_factor='1')
+        collection_function(server, runLogFile)
 
         solrMajorVersion, solrImplVersion = server.get_version()
 
@@ -741,7 +747,7 @@ def main():
     wiki1kSchemaCloudPerfFile = '%s/wiki_1k_schema_cloud.perfdata.txt' % constants.LOG_BASE_DIR
     wiki1kCloudGcFile = '%s/wiki_1k_schema_cloud.gc.txt' % constants.LOG_BASE_DIR
     wiki1kCloudBytesIndexed, wiki1kCloudIndexTimeSec, wiki1kCloudDocsIndexed, \
-    wiki1kCloudTimes, wiki1kCloudGarbage, wiki1kCloudPeak = run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, wiki1kSchemaCloudPerfFile, wiki1kCloudGcFile)
+    wiki1kCloudTimes, wiki1kCloudGarbage, wiki1kCloudPeak = run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, wiki1kSchemaCloudPerfFile, wiki1kCloudGcFile, create_collection_2x1)
 
     wiki1kCloudIndexChartData = []
     wiki1kCloudIndexDocsSecChartData = []
@@ -762,6 +768,30 @@ def main():
     wiki1kCloudIndexDocsSecChartData.sort()
     wiki1kCloudIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
+    wiki1kSchemaCloud1x2PerfFile = '%s/wiki_1k_schema_cloud.perfdata.txt' % constants.LOG_BASE_DIR
+    wiki1kCloud1x2GcFile = '%s/wiki_1k_schema_cloud.gc.txt' % constants.LOG_BASE_DIR
+    wiki1kCloud1x2BytesIndexed, wiki1kCloudIndexTimeSec, wiki1kCloudDocsIndexed, \
+    wiki1kCloud1x2Times, wiki1kCloud1x2Garbage, wiki1kCloud1x2Peak = run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, wiki1kSchemaCloud1x2PerfFile, wiki1kCloud1x2GcFile, create_collection_1x2)
+
+    wiki1kCloud1x2IndexChartData = []
+    wiki1kCloud1x2IndexDocsSecChartData = []
+
+    if os.path.isfile(wiki1kSchemaCloud1x2PerfFile):
+        with open(wiki1kSchemaCloud1x2PerfFile, 'r') as f:
+            lines = [line.rstrip('\n') for line in f]
+            for l in lines:
+                timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
+                implVersion = solrImplVersion
+                wiki1kCloud1x2IndexChartData.append(
+                    '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
+                wiki1kCloud1x2IndexDocsSecChartData.append('%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
+
+    wiki1kCloud1x2IndexChartData.sort()
+    wiki1kCloud1x2IndexChartData.insert(0, 'Date,GB/hour')
+
+    wiki1kCloud1x2IndexDocsSecChartData.sort()
+    wiki1kCloud1x2IndexDocsSecChartData.insert(0, 'Date,K docs/sec')
+
     if not NOREPORT:
         graphutils.writeIndexingHTML(annotations,
                                      [simpleIndexChartData,
@@ -771,7 +801,8 @@ def main():
                                      # wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
                                      # wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData,
                                      # wiki4kSchemaGcPeakChartData,
-                                     wiki1kCloudIndexChartData, wiki1kCloudIndexDocsSecChartData])
+                                     wiki1kCloudIndexChartData, wiki1kCloudIndexDocsSecChartData,
+                                     wiki1kCloud1x2IndexChartData, wiki1kCloud1x2IndexDocsSecChartData])
 
     totalBenchTime = time.time() - t0
     utils.info('Total bench time: %d seconds' % totalBenchTime)

@@ -138,7 +138,8 @@ def writeIndexingHTML(annotations, chart_data):
     simpleIndexChartData, \
     wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData, \
     wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData, wiki1kSchemaGcPeakChartData, \
-    wiki1kCloudIndexChartData, wiki1kCloudIndexDocsSecChartData = chart_data
+    wiki1kCloudIndexChartData, wiki1kCloudIndexDocsSecChartData, \
+    wiki1kCloud1x2IndexChartData, wiki1kCloud1x2IndexDocsSecChartData = chart_data
 
     # unused today
     # wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData, \
@@ -161,18 +162,25 @@ def writeIndexingHTML(annotations, chart_data):
     w('<li><a href="#Wiki_1k_Peak_memory">Peak memory usage</a></li>')
     w('</ul>')
 
-    w('<li>~4KB docs from wikipedia (29GB, 6,726,515 docs)</li>')
-    w('<ul>')
-    w('<li><a href="#Wiki_4k_Index">GB/hour plain text indexing throughput</a></li>')
-    w('<li><a href="#Wiki_4k_Index_Docs_sec">K docs/sec plain text indexing throughput</a></li>')
-    w('<li><a href="#Wiki_4k_GCTimes">JIT/GC times indexing</a></li>')
-    w('<li><a href="#Wiki_4k_Garbage">Garbage created</a></li>')
-    w('<li><a href="#Wiki_4k_Peak_memory">Peak memory usage</a></li>')
-    w('</ul>')
+    # w('<li>~4KB docs from wikipedia (29GB, 6,726,515 docs)</li>')
+    # w('<ul>')
+    # w('<li><a href="#Wiki_4k_Index">GB/hour plain text indexing throughput</a></li>')
+    # w('<li><a href="#Wiki_4k_Index_Docs_sec">K docs/sec plain text indexing throughput</a></li>')
+    # w('<li><a href="#Wiki_4k_GCTimes">JIT/GC times indexing</a></li>')
+    # w('<li><a href="#Wiki_4k_Garbage">Garbage created</a></li>')
+    # w('<li><a href="#Wiki_4k_Peak_memory">Peak memory usage</a></li>')
+    # w('</ul>')
+
     w('<li>~1KB docs from wikipedia (31 GB, 33,332,620 docs) on SolrCloud 2 nodes, 2 shards, 1 replica</li>')
     w('<ul>')
     w('<li><a href="#Wiki_1k_Cloud_Index">GB/hour plain text indexing throughput</a></li>')
     w('<li><a href="#Wiki_1k_Cloud_Index_Docs_sec">K docs/sec plain text indexing throughput</a></li>')
+    w('</ul>')
+
+    w('<li>~1KB docs from wikipedia (31 GB, 33,332,620 docs) on SolrCloud 2 nodes, 1 shards, 2 replicas</li>')
+    w('<ul>')
+    w('<li><a href="#Wiki_1k_Cloud1x2_Index">GB/hour plain text indexing throughput</a></li>')
+    w('<li><a href="#Wiki_1k_Cloud1x2_Index_Docs_sec">K docs/sec plain text indexing throughput</a></li>')
     w('</ul>')
 
     w('</ul>')
@@ -220,10 +228,17 @@ def writeIndexingHTML(annotations, chart_data):
 
     w('<br>')
     w('<br>')
-    w(getOneGraphHTML(annotations, 'Wiki_1k_Cloud_Index', wiki1kCloudIndexChartData, "GB/hour", "SolrCloud: ~1 KB Wikipedia English docs", errorBars=False))
+    w(getOneGraphHTML(annotations, 'Wiki_1k_Cloud_Index', wiki1kCloudIndexChartData, "GB/hour", "SolrCloud: ~1 KB Wikipedia English docs - 2 shard, 1 replica", errorBars=False))
     w('<br>')
     w('<br>')
-    w(getOneGraphHTML(annotations, 'Wiki_1k_Cloud_Index_Docs_sec', wiki1kCloudIndexDocsSecChartData, "k docs/sec", "SolrCloud: ~1 KB Wikipedia English docs", errorBars=False))
+    w(getOneGraphHTML(annotations, 'Wiki_1k_Cloud_Index_Docs_sec', wiki1kCloudIndexDocsSecChartData, "k docs/sec", "SolrCloud: ~1 KB Wikipedia English docs - 2 shard, 1 replica", errorBars=False))
+
+    w('<br>')
+    w('<br>')
+    w(getOneGraphHTML(annotations, 'Wiki_1k_Cloud1x2_Index', wiki1kCloud1x2IndexChartData, "GB/hour", "SolrCloud: ~1 KB Wikipedia English docs - 1 shard, 2 replicas", errorBars=False))
+    w('<br>')
+    w('<br>')
+    w(getOneGraphHTML(annotations, 'Wiki_1k_Cloud1x2_Index_Docs_sec', wiki1kCloud1x2IndexDocsSecChartData, "k docs/sec", "SolrCloud: ~1 KB Wikipedia English docs - 1 shard, 2 replicas", errorBars=False))
 
     writeKnownChanges(annotations, w)
     footer(w)
