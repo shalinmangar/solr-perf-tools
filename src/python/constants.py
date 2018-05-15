@@ -8,9 +8,9 @@ GIT_REPO = 'https://github.com/apache/lucene-solr.git'
 TEST_BASE_DIR_1 = '/solr-bench'
 TEST_BASE_DIR_2 = '/solr-bench2'
 DATA_BASE_DIR = '/solr-data'
-LOG_BASE_DIR = '%s/logs' % TEST_BASE_DIR_1
+LOG_BASE_DIR = '%s/logs' % DATA_BASE_DIR
 
-NIGHTLY_REPORTS_DIR = '%s/reports' % TEST_BASE_DIR_1
+NIGHTLY_REPORTS_DIR = '%s/reports' % DATA_BASE_DIR
 
 SOLR_COLLECTION_NAME = 'gettingstarted'
 
