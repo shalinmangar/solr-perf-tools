@@ -129,6 +129,7 @@ class LuceneSolrCheckout:
         # clean ANY files not tracked in the repo -- this effectively restores pristine state
         utils.runCommand('%s clean -xfd .' % constants.GIT_EXE)
         if self.revision == 'LATEST':
+            utils.runCommand('%s checkout origin master >> %s 2>&1' % (constants.GIT_EXE, runLogFile))
             utils.runCommand('%s pull origin master >> %s 2>&1' % (constants.GIT_EXE, runLogFile))
         else:
             utils.runCommand('%s checkout %s >> %s 2>&1' % (constants.GIT_EXE, self.revision, runLogFile))
@@ -768,8 +769,8 @@ def main():
     wiki1kCloudIndexDocsSecChartData.sort()
     wiki1kCloudIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
-    wiki1kSchemaCloud1x2PerfFile = '%s/wiki_1k_schema_cloud.perfdata.txt' % constants.LOG_BASE_DIR
-    wiki1kCloud1x2GcFile = '%s/wiki_1k_schema_cloud.gc.txt' % constants.LOG_BASE_DIR
+    wiki1kSchemaCloud1x2PerfFile = '%s/wiki_1k_schema_cloud1x2.perfdata.txt' % constants.LOG_BASE_DIR
+    wiki1kCloud1x2GcFile = '%s/wiki_1k_schema_cloud1x2.gc.txt' % constants.LOG_BASE_DIR
     wiki1kCloud1x2BytesIndexed, wiki1kCloudIndexTimeSec, wiki1kCloudDocsIndexed, \
     wiki1kCloud1x2Times, wiki1kCloud1x2Garbage, wiki1kCloud1x2Peak = run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, wiki1kSchemaCloud1x2PerfFile, wiki1kCloud1x2GcFile, create_collection_1x2)
 
