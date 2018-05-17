@@ -20,26 +20,39 @@ package org.apache.solr.perf;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.*;
+import org.apache.solr.common.cloud.DocCollection;
+import org.apache.solr.common.cloud.Replica;
+import org.apache.solr.common.cloud.Slice;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class WikiIndexer {
 
+  static StatisticsHelper[] stats;
+
   public static void main(String[] clArgs) throws Exception {
     Args args = new Args(clArgs);
-    StatisticsHelper stats;
     if (args.getFlag("-useCloudSolrClient")) {
       // todo fix this
-      stats = StatisticsHelper.createLocalStats();
+      stats = new StatisticsHelper[2];
+      stats[0] = StatisticsHelper.createRemoteStats("9999");
+      stats[0].setLabel("8983");
+      stats[1] = StatisticsHelper.createRemoteStats("10000");
+      stats[1].setLabel("8984");
     } else  {
-      stats = StatisticsHelper.createRemoteStats();
+      stats = new StatisticsHelper[1];
+      stats[0] = StatisticsHelper.createRemoteStats("9999");
     }
-    stats.startStatistics();
+    for (StatisticsHelper stat : stats) {
+      stat.startStatistics();
+    }
     try {
       _main(clArgs);
     } finally {
-      stats.stopStatistics();
+      for (StatisticsHelper stat : stats) {
+        stat.stopStatistics();
+      }
     }
   }
 
@@ -106,6 +119,30 @@ public final class WikiIndexer {
       CloudSolrClient c = new CloudSolrClient(zkHost);
       c.setDefaultCollection(collectionName);
       client = c;
+      DocCollection collection = c.getZkStateReader().getClusterState().getCollection("gettingstarted");
+      for (Slice slice : collection.getActiveSlices()) {
+        if (slice.getReplicas().size() > 1)  {
+          for (Replica replica : slice.getReplicas()) {
+            for (StatisticsHelper stat : stats) {
+              if (replica.getNodeName().contains(stat.getLabel()))  {
+                if (slice.getLeader() == replica) {
+                  stat.setLabel("leader");
+                } else  {
+                  stat.setLabel("replica");
+                }
+              }
+            }
+          }
+        } else  {
+          for (Replica replica : slice.getReplicas()) {
+            for (StatisticsHelper stat : stats) {
+              if (replica.getNodeName().contains(stat.getLabel()))  {
+                stat.setLabel(replica.getNodeName());
+              }
+            }
+          }
+        }
+      }
     } else {
       throw new RuntimeException("Either -useHttpSolrClient or -useConcurrentUpdateSolrClient or -useCloudSolrClient must be specified");
     }

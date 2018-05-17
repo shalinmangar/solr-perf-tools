@@ -79,6 +79,16 @@ public class StatisticsHelper implements Runnable {
 
   protected volatile long startJITCTime;
 
+  protected String label;
+
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
   public static StatisticsHelper createLocalStats() throws IOException, MalformedObjectNameException {
 
     MBeanServerConnection connection = ManagementFactory.getPlatformMBeanServer();
@@ -123,8 +133,8 @@ public class StatisticsHelper implements Runnable {
 //    return new StatisticsHelper(operatingSystem, jitCompiler, heapMemory, youngMemoryPool, survivorMemoryPool, oldMemoryPool, youngCollector, oldCollector);
   }
 
-  public static StatisticsHelper createRemoteStats() throws IOException, MalformedObjectNameException {
-    String url = "service:jmx:rmi:///jndi/rmi://localhost:9999/jmxrmi";
+  public static StatisticsHelper createRemoteStats(String port) throws IOException, MalformedObjectNameException {
+    String url = "service:jmx:rmi:///jndi/rmi://127.0.0.1:" + port + "/jmxrmi";
     JMXServiceURL serviceURL = new JMXServiceURL(url);
     JMXConnector jmxConnector = JMXConnectorFactory.connect(serviceURL);
     MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
@@ -306,38 +316,38 @@ public class StatisticsHelper implements Runnable {
       scheduler.shutdown();
 
       System.err.println("- - - - - - - - - - - - - - - - - - - - ");
-      System.err.println("Statistics Ended at " + new Date());
+      errPrint("Statistics Ended at " + new Date());
       long elapsedTime = System.nanoTime() - startTime;
-      System.err.println("Elapsed time: " + TimeUnit.NANOSECONDS.toMillis(elapsedTime) + " ms");
+      errPrint("Elapsed time: " + TimeUnit.NANOSECONDS.toMillis(elapsedTime) + " ms");
       long elapsedJITCTime = jitCompiler.getTotalCompilationTime() - startJITCTime;
-      System.err.println("\tTime in JIT compilation: " + elapsedJITCTime + " ms");
+      errPrint("Time in JIT compilation: " + elapsedJITCTime + " ms", 1);
       if (hasCollectors) {
         long elapsedYoungCollectionsTime = youngCollector.getCollectionTime() - startYoungCollectionsTime;
         long youngCollections = youngCollector.getCollectionCount() - startYoungCollections;
-        System.err.println("\tTime in Young Generation GC: " + elapsedYoungCollectionsTime + " ms (" + youngCollections
-                + " collections)");
+        errPrint("Time in Young Generation GC: " + elapsedYoungCollectionsTime + " ms (" + youngCollections
+                + " collections)", 1);
         long elapsedOldCollectionsTime = oldCollector.getCollectionTime() - startOldCollectionsTime;
         long oldCollections = oldCollector.getCollectionCount() - startOldCollections;
-        System.err.println("\tTime in Old Generation GC: " + elapsedOldCollectionsTime + " ms (" + oldCollections
-                + " collections)");
+        errPrint("Time in Old Generation GC: " + elapsedOldCollectionsTime + " ms (" + oldCollections
+                + " collections)", 1);
       } else {
-        System.err.println("\tTime in GC: N/A");
+        errPrint("Time in GC: N/A", 1);
       }
 
       if (hasMemoryPools) {
-        System.err.println("Garbage Generated in Young Generation: " + mebiBytes(totalYoungUsed) + " MiB");
-        System.err.println("Garbage Generated in Survivor Generation: " + mebiBytes(totalSurvivorUsed) + " MiB");
-        System.err.println("Garbage Generated in Old Generation: " + mebiBytes(totalOldUsed) + " MiB");
+        errPrint("Garbage Generated in Young Generation: " + mebiBytes(totalYoungUsed) + " MiB");
+        errPrint("Garbage Generated in Survivor Generation: " + mebiBytes(totalSurvivorUsed) + " MiB");
+        errPrint("Garbage Generated in Old Generation: " + mebiBytes(totalOldUsed) + " MiB");
 
-        System.err.println("Peak usage in Young Generation: " + mebiBytes(youngMemoryPool.getPeakUsage().getUsed()) + " MiB");
-        System.err.println("Peak usage in Survivor Generation: " + mebiBytes(survivorMemoryPool.getPeakUsage().getUsed()) + " MiB");
-        System.err.println("Peak usage in Old Generation: " + mebiBytes(oldMemoryPool.getPeakUsage().getUsed()) + " MiB");
+        errPrint("Peak usage in Young Generation: " + mebiBytes(youngMemoryPool.getPeakUsage().getUsed()) + " MiB");
+        errPrint("Peak usage in Survivor Generation: " + mebiBytes(survivorMemoryPool.getPeakUsage().getUsed()) + " MiB");
+        errPrint("Peak usage in Old Generation: " + mebiBytes(oldMemoryPool.getPeakUsage().getUsed()) + " MiB");
       } else {
-        System.err.println("Garbage Generated: N/A");
+        errPrint("Garbage Generated: N/A");
       }
 
       double systemLoadAverage = operatingSystem.getSystemLoadAverage();
-      System.err.println("Average System Load: " + systemLoadAverage);
+      errPrint("Average System Load: " + systemLoadAverage);
 
       // todo fix this
 //      System.err.println("Process CPU Load: " + getProcessCpuLoad(connection));
@@ -345,14 +355,32 @@ public class StatisticsHelper implements Runnable {
       if (operatingSystem instanceof com.sun.management.OperatingSystemMXBean) {
         com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) operatingSystem;
         long elapsedProcessCPUTime = os.getProcessCpuTime() - startProcessCPUTime;
-        System.err.println("Average CPU Load: " + ((float) elapsedProcessCPUTime * 100 / elapsedTime) + "/"
+        errPrint("Average CPU Load: " + ((float) elapsedProcessCPUTime * 100 / elapsedTime) + "/"
                 + (100 * operatingSystem.getAvailableProcessors()));
       } else {
-        System.err.println("Average CPU Load: N/A");
+        errPrint("Average CPU Load: N/A");
       }
 
       System.err.println("----------------------------------------\n");
       return true;
+    }
+  }
+
+  private void errPrint(String message) {
+    errPrint(message, 0);
+  }
+
+  private void errPrint(String message, int indentBy) {
+    if (label == null)  {
+      for (int i = 0; i < indentBy; i++) {
+        System.err.print('\t');
+      }
+      System.err.println(message);
+    } else  {
+      for (int i = 0; i < indentBy; i++) {
+        System.err.print('\t');
+      }
+      System.err.println(label + " - " + message);
     }
   }
 
