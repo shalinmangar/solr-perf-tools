@@ -242,7 +242,7 @@ def run_simple_bench(start, tgz, runLogFile, perfFile):
 
         t0 = time.time()
         utils.runComand('binpost', cmd, logFile)
-        t1 = time.time() - t0 + 1
+        t1 = time.time() - t0
 
         bytesIndexed = os.stat(constants.IMDB_DATA_FILE).st_size
         docsIndexed = utils.get_num_found(constants.SOLR_COLLECTION_NAME)
