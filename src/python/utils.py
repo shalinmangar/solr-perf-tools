@@ -36,7 +36,7 @@ def runCommand(command):
 def runComand(name, command, log):
     p = subprocess.Popen(command, shell=False, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
-    f = open(log, 'wbu')
+    f = open(log, 'a+')
     while True:
         s = p.stdout.readline()
         if s == '':
