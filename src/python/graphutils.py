@@ -14,7 +14,7 @@ onClickJS = '''
 
   function doClick(ev, msec, pts) {
     d = new Date(msec);
-    top.location = d.getFullYear() + "." + zp(1+d.getMonth(), 2) + "." + zp(d.getDate(), 2) + "." + zp(d.getHours(), 2) + "." + zp(d.getMinutes(), 2) + "." + zp(d.getSeconds(), 2) + ".html";
+    top.location = "../logs/" + d.getFullYear() + "." + zp(1+d.getMonth(), 2) + "." + zp(d.getDate(), 2) + "." + zp(d.getHours(), 2) + "." + zp(d.getMinutes(), 2) + "." + zp(d.getSeconds(), 2) + "/output.txt";
   }
 '''
 
@@ -104,7 +104,8 @@ def header(w, title):
     w('<style type="text/css">')
     w('BODY { font-family:verdana; }')
     w('</style>')
-    w('<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>\n')
+    w('<script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>\n')
+    w('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css" />\n')
     w('</head>')
     w('<body>')
 
