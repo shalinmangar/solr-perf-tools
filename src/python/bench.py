@@ -113,9 +113,9 @@ class LuceneSolrCheckout:
 
     def updateToRevision(self, runLogFile):
         # resets any staged changes (there shouldn't be any though)
-        # utils.runCommand('%s reset --hard' % constants.GIT_EXE)
+        utils.runCommand('%s reset --hard' % constants.GIT_EXE)
         # clean ANY files not tracked in the repo -- this effectively restores pristine state
-        # utils.runCommand('%s clean -xfd .' % constants.GIT_EXE)
+        utils.runCommand('%s clean -xfd .' % constants.GIT_EXE)
         if self.revision == 'LATEST':
             utils.runCommand('%s checkout origin master >> %s 2>&1' % (constants.GIT_EXE, runLogFile))
             utils.runCommand('%s pull origin master >> %s 2>&1' % (constants.GIT_EXE, runLogFile))
@@ -126,9 +126,9 @@ class LuceneSolrCheckout:
         x = os.getcwd()
         try:
             os.chdir('%s' % self.checkoutDir)
-            # utils.runCommand('%s clean clean-jars >> %s 2>&1' % (constants.ANT_EXE, runLogFile))
+            utils.runCommand('%s clean clean-jars >> %s 2>&1' % (constants.ANT_EXE, runLogFile))
             os.chdir('%s/solr' % self.checkoutDir)
-            # utils.runCommand('%s create-package >> %s 2>&1' % (constants.ANT_EXE, runLogFile))
+            utils.runCommand('%s create-package >> %s 2>&1' % (constants.ANT_EXE, runLogFile))
             packaged = os.path.join(os.getcwd(), "package")
             files = glob.glob(os.path.join(packaged, '*.tgz'))
             if len(files) == 0:
@@ -241,7 +241,7 @@ def run_simple_bench(start, tgz, runLogFile, perfFile):
         utils.info('Executing: %s' % ' '.join(cmd))
 
         t0 = time.time()
-        # utils.runComand('binpost', cmd, logFile)
+        utils.runComand('binpost', cmd, logFile)
         t1 = time.time() - t0 + 1
 
         bytesIndexed = os.stat(constants.IMDB_DATA_FILE).st_size
