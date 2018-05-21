@@ -4,6 +4,7 @@ import glob
 import os
 import re
 import shutil
+import traceback
 
 import datetime
 import requests
@@ -404,12 +405,17 @@ class JavaBench:
         utils.info('Running %s bench. Logging at %s' % (testName, logFile))
         utils.info('Executing: %s' % ' '.join(cmd))
 
+        tmpLogFile = '/tmp/%s.log' % testName
+        if os.path.exists(tmpLogFile):
+            os.remove(tmpLogFile)
         t0 = time.time()
-        utils.runComand(testName, cmd, logFile)
+        utils.runComand(testName, cmd, tmpLogFile)
         t1 = time.time() - t0
 
-        results = BenchResults(logFile, server, t1)
+        results = BenchResults(tmpLogFile, server, t1)
         print(results)
+
+        utils.runCommand('cat %s >> %s' % (tmpLogFile, logFile))
         return results
 
 
@@ -514,8 +520,8 @@ def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
 
             write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak)
         return bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak
-    except Exception as e:
-        print('Exception %s' % e)
+    except:
+        print('Exception %s' % traceback.format_exc())
     finally:
         server.stop()
         time.sleep(10)
@@ -582,6 +588,8 @@ def run_wiki_4k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
             write_gc_file(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, times, garbage, peak)
 
         return bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak
+    except:
+        print('Exception %s' % traceback.format_exc())
     finally:
         server.stop()
         time.sleep(10)
@@ -673,6 +681,8 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile, col
             write_gc_file_cloud(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, results.node_data)
 
         return results
+    except:
+        print('Exception %s' % traceback.format_exc())
     finally:
         try:
             server2.stop()
