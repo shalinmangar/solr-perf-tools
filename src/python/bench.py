@@ -172,6 +172,8 @@ class SolrServer:
         try:
             os.chdir(self.extract_dir)
             cmd = ['%s/bin/solr' % self.extract_dir, 'start', '-p', self.port]
+            if self.jvm_args is not None:
+                cmd.extend(self.jvm_args)
             if self.host is not None:
                 cmd.extend(['-h', self.host])
             if self.memory is not None:
@@ -186,8 +188,6 @@ class SolrServer:
                 cmd.extend(['-s', self.solr_home])
             if self.example is not None:
                 cmd.extend(['-e', self.example])
-            if self.jvm_args is not None:
-                cmd.append(self.jvm_args)
             utils.info('Running solr with command: %s' % ' '.join(cmd))
             utils.runComand('solr server', cmd, '%s' % runLogFile)
         finally:
@@ -302,7 +302,7 @@ class BenchResults:
                 else:
                     m = self.reTimeInLabel.search(line)
                     if m is not None:
-                        if self.node_data[m.group(1)] is None:
+                        if not self.node_data.has_key(m.group(1)):
                             self.node_data[m.group(1)] = {'times': {}, 'garbage': {}, 'peak': {}}
                         self.node_data[m.group(1)]['times'][m.group(2)] = float(m.group(3)) / 1000.
 
@@ -312,7 +312,7 @@ class BenchResults:
                 else:
                     m = self.reGarbageInLabel.search(line)
                     if m is not None:
-                        if self.node_data[m.group(1)] is None:
+                        if not self.node_data.has_key(m.group(1)):
                             self.node_data[m.group(1)] = {'times': {}, 'garbage': {}, 'peak': {}}
                         self.node_data[m.group(1)]['garbage'][m.group(2)] = float(m.group(3))
 
@@ -322,7 +322,7 @@ class BenchResults:
                 else:
                     m = self.rePeakUsageLabel.search(line)
                     if m is not None:
-                        if self.node_data[m.group(1)] is None:
+                        if not self.node_data.has_key(m.group(1)):
                             self.node_data[m.group(1)] = {'times': {}, 'garbage': {}, 'peak': {}}
                         self.node_data[m.group(1)]['peak'][m.group(2)] = float(m.group(3))
 
@@ -409,7 +409,7 @@ class JavaBench:
         t1 = time.time() - t0
 
         results = BenchResults(logFile, server, t1)
-        print results
+        print(results)
         return results
 
 
@@ -457,10 +457,12 @@ def run_wiki_schemaless_bench(start, tgz, runLogFile, perfFile, gcFile):
 
 def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
     # we start in schemaless mode but use the schema api to add the right fields
-    jmx_args = ' '.join(['-Dcom.sun.management.jmxremote',
+    jmx_args = ['-Dcom.sun.management.jmxremote',
+                         '-Dcom.sun.management.jmxremote.local.only=true',
                          '-Dcom.sun.management.jmxremote.port=9999',
+                         '-Dcom.sun.management.jmxremote.rmi.port=9999',
                          '-Dcom.sun.management.jmxremote.authenticate=false',
-                         '-Dcom.sun.management.jmxremote.ssl=false'])
+                         '-Dcom.sun.management.jmxremote.ssl=false']
     server = SolrServer(tgz, '%s/wiki-1k-schema' % constants.BENCH_DIR, example='schemaless', memory='4g', jvm_args=jmx_args)
     server.extract(runLogFile)
     try:
@@ -521,10 +523,12 @@ def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
 
 def run_wiki_4k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
     # we start in schemaless mode but use the schema api to add the right fields
-    jmx_args = ' '.join(['-Dcom.sun.management.jmxremote',
+    jmx_args = ['-Dcom.sun.management.jmxremote',
+                         '-Dcom.sun.management.jmxremote.local.only=true',
                          '-Dcom.sun.management.jmxremote.port=9999',
+                         '-Dcom.sun.management.jmxremote.rmi.port=9999',
                          '-Dcom.sun.management.jmxremote.authenticate=false',
-                         '-Dcom.sun.management.jmxremote.ssl=false'])
+                         '-Dcom.sun.management.jmxremote.ssl=false']
     server = SolrServer(tgz, '%s/wiki-4k-schema' % constants.BENCH_DIR, example='schemaless', memory='4g',
                         jvm_args=jmx_args)
     server.extract(runLogFile)
@@ -595,20 +599,20 @@ def create_collection_1x2(server, runLogFile):
 
 def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile, collection_function):
     # we start in schemaless mode but use the schema api to add the right fields
-    jmx_args = ' '.join(['-Dcom.sun.management.jmxremote',
-                         '-Djava.rmi.server.hostname=127.0.0.1',
+    jmx_args = ['-Dcom.sun.management.jmxremote',
+                         '-Dcom.sun.management.jmxremote.local.only=true',
                          '-Dcom.sun.management.jmxremote.port=9999',
                          '-Dcom.sun.management.jmxremote.rmi.port=9999',
                          '-Dcom.sun.management.jmxremote.authenticate=false',
-                         '-Dcom.sun.management.jmxremote.ssl=false'])
+                         '-Dcom.sun.management.jmxremote.ssl=false']
     server = SolrServer(tgz, '%s/wiki-1k-schema_cloud_node1' % constants.BENCH_DIR, name = '1', memory='4g', jvm_args=jmx_args, cloud_mode=True)
     server.extract(runLogFile)
-    jmx_args2 = ' '.join(['-Dcom.sun.management.jmxremote',
-                        '-Djava.rmi.server.hostname=127.0.0.1',
+    jmx_args2 = ['-Dcom.sun.management.jmxremote',
+                          '-Dcom.sun.management.jmxremote.local.only=true',
                          '-Dcom.sun.management.jmxremote.port=10000',
                          '-Dcom.sun.management.jmxremote.rmi.port=10000',
                          '-Dcom.sun.management.jmxremote.authenticate=false',
-                         '-Dcom.sun.management.jmxremote.ssl=false'])
+                         '-Dcom.sun.management.jmxremote.ssl=false']
     server2 = SolrServer(tgz, '%s/wiki-1k-schema_cloud_node2' % constants.BENCH_DIR_2, name='2', zk_host='localhost:9983', memory='4g', port='8984', jvm_args = jmx_args2, cloud_mode=True)
     server2.extract(runLogFile)
     try:
@@ -681,23 +685,19 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile, col
 
 def write_gc_file_cloud(gcFile, timeStampLoggable, solrMajorVersion, solrImplVersion, node_data):
     with open(gcFile, 'a+') as f:
-        f.write('%s,%s,%s,' % (timeStampLoggable, solrMajorVersion, solrImplVersion))
+        f.write('%s,%s,%s' % (timeStampLoggable, solrMajorVersion, solrImplVersion))
         for n in sorted(node_data):
             times = node_data[n]['times']
             garbage = node_data[n]['garbage']
             peak = node_data[n]['peak']
 
             for k in sorted(times):
-                f.write('%f,' % times[k])
+                f.write(',%f' % times[k])
             for k in sorted(garbage):
-                f.write('%f,' % garbage[k])
-            c = 0
+                f.write(',%f' % garbage[k])
             for k in sorted(peak):
-                f.write('%f' % peak[k])
-                c += 1
-                if c < len(peak):
-                    f.write(',')
-            f.write('\n')
+                f.write(',%f' % peak[k])
+        f.write('\n')
 
 
 
@@ -825,42 +825,48 @@ def main():
     wiki1kSchemaIndexDocsSecChartData.sort()
     wiki1kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
-    # wiki4kSchemaPerfFile = '%s/wiki_4k_schema.perfdata.txt' % constants.LOG_BASE_DIR
-    # wiki4kGcFile = '%s/wiki_4k_schema.gc.txt' % constants.LOG_BASE_DIR
-    # wiki4kBytesIndexed, wiki4kIndexTimeSec, wiki4kDocsIndexed, \
-    # wiki4kTimes, wiki4kGarbage, wiki4kPeak = run_wiki_4k_schema_bench(start, tgz, runLogFile, wiki4kSchemaPerfFile, wiki4kGcFile)
-    # wiki4kSchemaIndexChartData = []
-    # wiki4kSchemaIndexDocsSecChartData = []
-    #
-    # wiki4kSchemaGcTimesChartData = []
-    # wiki4kSchemaGcGarbageChartData = []
-    # wiki4kSchemaGcPeakChartData = []
-    # populate_gc_data(wiki4kGcFile, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData,
-    #                  wiki4kSchemaGcTimesChartData)
-    #
-    # if os.path.isfile(wiki4kSchemaPerfFile):
-    #     with open(wiki4kSchemaPerfFile, 'r') as f:
-    #         lines = [line.rstrip('\n') for line in f]
-    #         for l in lines:
-    #             timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
-    #             implVersion = solrImplVersion
-    #             wiki4kSchemaIndexChartData.append(
-    #                     '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
-    #             wiki4kSchemaIndexDocsSecChartData.append('%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
-    #
-    # wiki4kSchemaIndexChartData.sort()
-    # wiki4kSchemaIndexChartData.insert(0, 'Date,GB/hour')
-    #
-    # wiki4kSchemaIndexDocsSecChartData.sort()
-    # wiki4kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
+    wiki4kSchemaPerfFile = '%s/wiki_4k_schema.perfdata.txt' % constants.LOG_BASE_DIR
+    wiki4kGcFile = '%s/wiki_4k_schema.gc.txt' % constants.LOG_BASE_DIR
+    wiki4kBytesIndexed, wiki4kIndexTimeSec, wiki4kDocsIndexed, \
+    wiki4kTimes, wiki4kGarbage, wiki4kPeak = run_wiki_4k_schema_bench(start, tgz, runLogFile, wiki4kSchemaPerfFile, wiki4kGcFile)
+    wiki4kSchemaIndexChartData = []
+    wiki4kSchemaIndexDocsSecChartData = []
+
+    wiki4kSchemaGcTimesChartData = []
+    wiki4kSchemaGcGarbageChartData = []
+    wiki4kSchemaGcPeakChartData = []
+    populate_gc_data(wiki4kGcFile, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData,
+                     wiki4kSchemaGcTimesChartData)
+
+    if os.path.isfile(wiki4kSchemaPerfFile):
+        with open(wiki4kSchemaPerfFile, 'r') as f:
+            lines = [line.rstrip('\n') for line in f]
+            for l in lines:
+                timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
+                implVersion = solrImplVersion
+                wiki4kSchemaIndexChartData.append(
+                        '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
+                wiki4kSchemaIndexDocsSecChartData.append('%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
+
+    wiki4kSchemaIndexChartData.sort()
+    wiki4kSchemaIndexChartData.insert(0, 'Date,GB/hour')
+
+    wiki4kSchemaIndexDocsSecChartData.sort()
+    wiki4kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
     wiki1kSchemaCloudPerfFile = '%s/wiki_1k_schema_cloud.perfdata.txt' % constants.LOG_BASE_DIR
     wiki1kCloudGcFile = '%s/wiki_1k_schema_cloud.gc.txt' % constants.LOG_BASE_DIR
-    wiki1kCloudBytesIndexed, wiki1kCloudIndexTimeSec, wiki1kCloudDocsIndexed, \
-    wiki1kCloudTimes, wiki1kCloudGarbage, wiki1kCloudPeak = run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile,
+    results = run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile,
                                                                                            wiki1kSchemaCloudPerfFile,
                                                                                            wiki1kCloudGcFile,
                                                                                            create_collection_2x1)
+
+    wiki1kCloudBytesIndexed, wiki1kCloudIndexTimeSec, wiki1kCloudDocsIndexed = [results.bytesIndexed, results.indexTimeSec, results.docsIndexed]
+
+    wiki1kCloudGcTimesChartData = []
+    wiki1kCloudGcGarbageChartData = []
+    wiki1kCloudGcPeakChartData = []
+    populate_cloud_gc_data(wiki1kCloudGcFile, results.node_data, wiki1kCloudGcTimesChartData, wiki1kCloudGcGarbageChartData, wiki1kCloudGcPeakChartData)
 
     wiki1kCloudIndexChartData = []
     wiki1kCloudIndexDocsSecChartData = []
@@ -884,15 +890,22 @@ def main():
 
     wiki1kSchemaCloud1x2PerfFile = '%s/wiki_1k_schema_cloud1x2.perfdata.txt' % constants.LOG_BASE_DIR
     wiki1kCloud1x2GcFile = '%s/wiki_1k_schema_cloud1x2.gc.txt' % constants.LOG_BASE_DIR
-    wiki1kCloud1x2BytesIndexed, wiki1kCloudIndexTimeSec, wiki1kCloudDocsIndexed, \
-    wiki1kCloud1x2Times, wiki1kCloud1x2Garbage, wiki1kCloud1x2Peak = run_wiki_1k_schema_cloud_bench(start, tgz,
+
+    results = run_wiki_1k_schema_cloud_bench(start, tgz,
                                                                                                     runLogFile,
                                                                                                     wiki1kSchemaCloud1x2PerfFile,
                                                                                                     wiki1kCloud1x2GcFile,
                                                                                                     create_collection_1x2)
 
+    wiki1kCloud1x2BytesIndexed, wiki1kCloudIndexTimeSec, wiki1kCloudDocsIndexed = [results.bytesIndexed, results.indexTimeSec, results.docsIndexed]
+
     wiki1kCloud1x2IndexChartData = []
     wiki1kCloud1x2IndexDocsSecChartData = []
+
+    wiki1kCloud1x2GcTimesChartData = []
+    wiki1kCloud1x2GcGarbageChartData = []
+    wiki1kCloud1x2GcPeakChartData = []
+    populate_cloud_gc_data(wiki1kCloud1x2GcFile, results.node_data, wiki1kCloud1x2GcTimesChartData, wiki1kCloud1x2GcGarbageChartData, wiki1kCloud1x2GcPeakChartData)
 
     if os.path.isfile(wiki1kSchemaCloud1x2PerfFile):
         with open(wiki1kSchemaCloud1x2PerfFile, 'r') as f:
@@ -917,11 +930,18 @@ def main():
                                       wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData,
                                       wiki1kSchemaGcTimesChartData, wiki1kSchemaGcGarbageChartData,
                                       wiki1kSchemaGcPeakChartData,
-                                      # wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
-                                      # wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData,
-                                      # wiki4kSchemaGcPeakChartData,
+
+                                      wiki4kSchemaIndexChartData, wiki4kSchemaIndexDocsSecChartData,
+                                      wiki4kSchemaGcTimesChartData, wiki4kSchemaGcGarbageChartData,
+                                      wiki4kSchemaGcPeakChartData,
+
                                       wiki1kCloudIndexChartData, wiki1kCloudIndexDocsSecChartData,
-                                      wiki1kCloud1x2IndexChartData, wiki1kCloud1x2IndexDocsSecChartData])
+                                      wiki1kCloudGcTimesChartData, wiki1kCloudGcGarbageChartData,
+                                      wiki1kCloudGcPeakChartData,
+
+                                      wiki1kCloud1x2IndexChartData, wiki1kCloud1x2IndexDocsSecChartData,
+                                      wiki1kCloud1x2GcTimesChartData, wiki1kCloud1x2GcGarbageChartData,
+                                      wiki1kCloud1x2GcPeakChartData])
 
     totalBenchTime = time.time() - t0
     utils.info('Total bench time: %d seconds' % totalBenchTime)
@@ -976,6 +996,46 @@ def populate_gc_data(gcFile, gcGarbageChartData, gcPeakChartData, gcTimesChartDa
     gcPeakChartData.sort()
     gcPeakChartData.insert(0, 'Date,Young Peak (MB),Survivor Peak (MB),Old Peak (MB)')
 
+
+def populate_cloud_gc_data(gcFile, node_data, gcTimesChartData, gcGarbageChartData, gcPeakChartData):
+    if os.path.isfile(gcFile):
+        with open(gcFile, 'r') as f:
+            lines = [line.rstrip('\n') for line in f]
+            for l in lines:
+                x = l.split(',')
+                timeStamp, solrMajorVersion, solrImplVersion = x[:3]
+
+                jitCompilation, oldGenGC, \
+                youngGenGc, oldGenGarbage, survivorGenGarbage, youngGenGarbage, \
+                oldGenPeak, survivorGenPeak, youngGenPeak = x[3:12]
+
+                jitCompilation2, oldGenGC2, \
+                youngGenGc2, oldGenGarbage2, survivorGenGarbage2, youngGenGarbage2, \
+                oldGenPeak2, survivorGenPeak2, youngGenPeak2 = x[12:]
+
+                s = '%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f' % (timeStamp, float(jitCompilation), float(youngGenGc), float(oldGenGC), float(jitCompilation2), float(youngGenGc2), float(oldGenGC2))
+                gcTimesChartData.append(s)
+                s = '%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f' % (
+                    timeStamp, float(youngGenGarbage) / 1024., float(survivorGenGarbage) / 1024.,
+                    float(oldGenGarbage) / 1024.,
+                    float(youngGenGarbage2) / 1024., float(survivorGenGarbage2) / 1024.,
+                    float(oldGenGarbage2) / 1024.)
+                gcGarbageChartData.append(s)
+                s = '%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f' % \
+                    (timeStamp,
+                     float(youngGenPeak), float(survivorGenPeak), float(oldGenPeak),
+                     float(youngGenPeak2), float(survivorGenPeak2), float(oldGenPeak2))
+                gcPeakChartData.append(s)
+
+    node1 = sorted(node_data)[0]
+    node2 = sorted(node_data)[1]
+
+    gcTimesChartData.sort()
+    gcTimesChartData.insert(0, 'Date, %s JIT (sec), %s Young GC (sec), %s Old GC (sec), %s JIT (sec), %s Young GC (sec), %s Old GC (sec)' % (node1, node1, node1, node2, node2, node2))
+    gcGarbageChartData.sort()
+    gcGarbageChartData.insert(0, 'Date, %s Young Garbage (GB), %s Survivor Garbage (GB), %s Old Garbage (GB), %s Young Garbage (GB), %s Survivor Garbage (GB), %s Old Garbage (GB)' % (node1, node1, node1, node2, node2, node2))
+    gcPeakChartData.sort()
+    gcPeakChartData.insert(0, 'Date, %s Young Peak (MB), %s Survivor Peak (MB), %s Old Peak (MB), %s Young Peak (MB), %s Survivor Peak (MB), %s Old Peak (MB)' % (node1, node1, node1, node2, node2, node2))
 
 if __name__ == '__main__':
     main()

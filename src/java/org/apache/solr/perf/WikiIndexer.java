@@ -34,7 +34,6 @@ public final class WikiIndexer {
   public static void main(String[] clArgs) throws Exception {
     Args args = new Args(clArgs);
     if (args.getFlag("-useCloudSolrClient")) {
-      // todo fix this
       stats = new StatisticsHelper[2];
       stats[0] = StatisticsHelper.createRemoteStats("9999");
       stats[0].setLabel("8983");
@@ -44,15 +43,19 @@ public final class WikiIndexer {
       stats = new StatisticsHelper[1];
       stats[0] = StatisticsHelper.createRemoteStats("9999");
     }
-    for (StatisticsHelper stat : stats) {
-      stat.startStatistics();
-    }
     try {
-      _main(clArgs);
-    } finally {
       for (StatisticsHelper stat : stats) {
-        stat.stopStatistics();
+        stat.startStatistics();
       }
+      try {
+        _main(clArgs);
+      } finally {
+        for (StatisticsHelper stat : stats) {
+          stat.stopStatistics();
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -119,6 +122,7 @@ public final class WikiIndexer {
       CloudSolrClient c = new CloudSolrClient(zkHost);
       c.setDefaultCollection(collectionName);
       client = c;
+      c.connect();
       DocCollection collection = c.getZkStateReader().getClusterState().getCollection("gettingstarted");
       for (Slice slice : collection.getActiveSlices()) {
         if (slice.getReplicas().size() > 1)  {
