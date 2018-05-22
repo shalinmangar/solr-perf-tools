@@ -196,7 +196,7 @@ class SolrServer:
             os.chdir(x)
 
     def create_collection(self, runLogFile, collection, num_shards='1', replication_factor='1',
-                          config='data_driven_schema_configs'):
+                          config='_default'):
         x = os.getcwd()
         try:
             os.chdir(self.extract_dir)
@@ -489,10 +489,9 @@ def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
                           data='{"add-field":{"name":"title","type":"string","stored":false, "indexed":true },'
                                '"add-field":{"name":"titleTokenized","type":"text_en","stored":true, "indexed":true },'
                                '"add-field":{"name":"body","type":"text_en","stored":false, "indexed":true },'
-                               '"add-field":{"name":"date","type":"date","stored":true, "indexed":true },'
-                               '"add-field":{"name":"timesecnum","type":"tint","stored":false, "indexed":true },'
-                               '"add-copy-field":{"source":"title","dest":[ "titleTokenized"]},'
-                               '"delete-copy-field":{ "source":"*", "dest":"_text_"}}')
+                               '"add-field":{"name":"date","type":"pdate","stored":true, "indexed":true },'
+                               '"add-field":{"name":"timesecnum","type":"pint","stored":false, "indexed":true },'
+                               '"add-copy-field":{"source":"title","dest":[ "titleTokenized"]}}')
         print(r.json())
 
         logFile = '%s' % runLogFile
@@ -556,10 +555,9 @@ def run_wiki_4k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
                           data='{"add-field":{"name":"title","type":"string","stored":false, "indexed":true },'
                                '"add-field":{"name":"titleTokenized","type":"text_en","stored":true, "indexed":true },'
                                '"add-field":{"name":"body","type":"text_en","stored":false, "indexed":true },'
-                               '"add-field":{"name":"date","type":"date","stored":true, "indexed":true },'
-                               '"add-field":{"name":"timesecnum","type":"tint","stored":false, "indexed":true },'
-                               '"add-copy-field":{"source":"title","dest":[ "titleTokenized"]},'
-                               '"delete-copy-field":{ "source":"*", "dest":"_text_"}}')
+                               '"add-field":{"name":"date","type":"pdate","stored":true, "indexed":true },'
+                               '"add-field":{"name":"timesecnum","type":"pint","stored":false, "indexed":true },'
+                               '"add-copy-field":{"source":"title","dest":[ "titleTokenized"]}}')
         print(r.json())
 
         logFile = '%s' % runLogFile
@@ -647,10 +645,9 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile, col
                           data='{"add-field":{"name":"title","type":"string","stored":false, "indexed":true },'
                                '"add-field":{"name":"titleTokenized","type":"text_en","stored":true, "indexed":true },'
                                '"add-field":{"name":"body","type":"text_en","stored":false, "indexed":true },'
-                               '"add-field":{"name":"date","type":"date","stored":true, "indexed":true },'
-                               '"add-field":{"name":"timesecnum","type":"tint","stored":false, "indexed":true },'
-                               '"add-copy-field":{"source":"title","dest":[ "titleTokenized"]},'
-                               '"delete-copy-field":{ "source":"*", "dest":"_text_"}}')
+                               '"add-field":{"name":"date","type":"pdate","stored":true, "indexed":true },'
+                               '"add-field":{"name":"timesecnum","type":"pint","stored":false, "indexed":true },'
+                               '"add-copy-field":{"source":"title","dest":[ "titleTokenized"]}}')
         print(r.json())
 
         logFile = '%s' % runLogFile

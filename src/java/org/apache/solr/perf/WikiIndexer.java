@@ -107,19 +107,20 @@ public final class WikiIndexer {
 
     final SolrClient client;
     if (useHttpSolrClient) {
-      HttpSolrClient c = new HttpSolrClient(solrUrl);
-      c.setParser(new BinaryResponseParser());
+      HttpSolrClient c = new HttpSolrClient.Builder(solrUrl).withResponseParser(new BinaryResponseParser()).build();
       c.setRequestWriter(new BinaryRequestWriter());
       client = c;
     } else if (useConcurrentUpdateSolrClient) {
-      ConcurrentUpdateSolrClient c = new ConcurrentUpdateSolrClient(solrUrl, batchSize * 2, numThreads);
-      c.setParser(new BinaryResponseParser());
+      ConcurrentUpdateSolrClient c = new ConcurrentUpdateSolrClient.Builder(solrUrl)
+              .withQueueSize(batchSize * 2)
+              .withThreadCount(numThreads)
+              .withResponseParser(new BinaryResponseParser()).build();
       c.setRequestWriter(new BinaryRequestWriter());
       c.setPollQueueTime(0);
       client = c;
       numThreads = 1; // no need to spawn multiple feeder threads when using ConcurrentUpdateSolrClient
     } else if (useCloudSolrClient) {
-      CloudSolrClient c = new CloudSolrClient(zkHost);
+      CloudSolrClient c = new CloudSolrClient.Builder().withZkHost(zkHost).build();
       c.setDefaultCollection(collectionName);
       client = c;
       c.connect();
