@@ -121,6 +121,7 @@ class LuceneSolrCheckout:
             utils.runCommand('%s checkout origin master >> %s 2>&1' % (constants.GIT_EXE, runLogFile))
             utils.runCommand('%s pull origin master >> %s 2>&1' % (constants.GIT_EXE, runLogFile))
         else:
+            utils.runCommand('%s checkout origin master >> %s 2>&1' % (constants.GIT_EXE, runLogFile))
             utils.runCommand('%s checkout %s >> %s 2>&1' % (constants.GIT_EXE, self.revision, runLogFile))
 
     def build(self, runLogFile):
