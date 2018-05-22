@@ -765,6 +765,7 @@ def main():
     runLogDir = '%s/%s' % (constants.LOG_BASE_DIR, timeStamp)
     os.makedirs(runLogDir)
     runLogFile = '%s/output.txt' % runLogDir
+    print('Logging to %s' % runLogFile)
     solr.checkout(runLogFile)
     tgz = solr.build(runLogFile)
     utils.info('Solr tgz file created at: %s' % tgz)
