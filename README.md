@@ -64,6 +64,7 @@ With slack integration enabled:
 Other supported command line arguments are:
 * '-no-report' to disable report generation
 * '-revision GIT_SHA' to run tests on a particular git sha instead of latest master
+* '-logFile /path/to/log/file' to log output to a custom location
 
 ## Running Contest
 
