@@ -238,6 +238,14 @@ class SolrServer:
         jars.extend(glob.glob('%s/dist/solrj-lib/*.jar' % self.extract_dir))
         return jars
 
+    def get_metrics(self):
+        r = requests.get('http://%s:%s/solr/admin/metrics?wt=json&indent=on' % (self.host, self.port))
+        return r.text
+
+    def get_cluster_state(self):
+        r = requests.get('http://%s:%s/solr/admin/collections?action=clusterstatuswt=json&indent=on' % (self.host, self.port))
+        return r.text
+
 
 def run_simple_bench(start, tgz, runLogFile, perfFile):
     server = SolrServer(tgz, '%s/simple' % constants.BENCH_DIR, example='schemaless', memory='2g')
@@ -256,6 +264,8 @@ def run_simple_bench(start, tgz, runLogFile, perfFile):
         t0 = time.time()
         utils.runComand('binpost', cmd, logFile)
         t1 = time.time() - t0
+
+        log_metrics(logFile, server, 'simple_bench')
 
         bytesIndexed = os.stat(constants.IMDB_DATA_FILE).st_size
         docsIndexed = utils.get_num_found(constants.SOLR_COLLECTION_NAME)
@@ -459,6 +469,8 @@ def run_wiki_schemaless_bench(start, tgz, runLogFile, perfFile, gcFile):
 
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = results.get_simple_results()
 
+        log_metrics(logFile, server, 'wiki_schemaless_bench')
+
         if docsIndexed != constants.WIKI_1K_NUM_DOCS:
             raise RuntimeError(
                 'Indexed num_docs do not match expected %d != found %d' % (constants.WIKI_1K_NUM_DOCS, docsIndexed))
@@ -520,6 +532,8 @@ def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
 
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = results.get_simple_results()
 
+        log_metrics(logFile, server, 'wiki_1k_schema_bench')
+
         if docsIndexed != constants.WIKI_1K_NUM_DOCS:
             raise RuntimeError(
                 'Indexed num_docs do not match expected %d != found %d' % (constants.WIKI_1K_NUM_DOCS, docsIndexed))
@@ -537,6 +551,13 @@ def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
     finally:
         server.stop()
         time.sleep(10)
+
+
+def log_metrics(logFile, server, bench_name):
+    with open(logFile, 'a+') as f:
+        f.write('--- BEGIN SOLR METRICS AFTER %s ---\n' % bench_name)
+        f.write(server.get_metrics())
+        f.write('--- END SOLR METRICS AFTER %s ---\n' % bench_name)
 
 
 def run_wiki_4k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
@@ -586,6 +607,8 @@ def run_wiki_4k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
                                 '-batchSize', '100'], logFile)
 
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = results.get_simple_results()
+
+        log_metrics(logFile, server, 'wiki_4k_schema_bench')
 
         if docsIndexed != constants.WIKI_4k_NUM_DOCS:
             raise RuntimeError(
@@ -679,6 +702,9 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile, col
 
         # bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = results.get_simple_results()
         bytesIndexed, indexTimeSec, docsIndexed = [results.bytesIndexed, results.indexTimeSec, results.docsIndexed]
+
+        log_metrics(logFile, server, 'wiki_1k_schema_cloud_bench_8983')
+        log_metrics(logFile, server2, 'wiki_1k_schema_cloud_bench_8984')
 
         if docsIndexed != constants.WIKI_1K_NUM_DOCS:
             raise RuntimeError(
