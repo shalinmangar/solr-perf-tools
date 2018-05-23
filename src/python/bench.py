@@ -72,7 +72,18 @@ KNOWN_CHANGES = [
      JsonRecordReader used to make a deep copy of the document map which was only required for very specialized
      methods. This deep copy has been removed to optimize the common case. This change only affects JSON indexing
      and therefore only the IMDB benchmark.
-     """)
+     """),
+    ('2018-05-22 01:11:16', 'Lucene/Solr 6.4.2 release', 'Built from tags/releases/lucene-solr/6.4.2'),
+    ('2018-05-22 03:01:58', 'Lucene/Solr 6.5.1 release', 'Built from tags/releases/lucene-solr/6.5.1'),
+    ('2018-05-22 04:53:12', 'Lucene/Solr 6.6.4 release', 'Built from tags/releases/lucene-solr/6.6.4'),
+    ('2018-05-22 07:12:16', 'Lucene/Solr 7.0.1 release',
+     """
+     Lucene/Solr 7.0.1 release. Switched timesecnum from tint to pint and date field to pdate
+     The _default configset is used instead of data_driven_schema_configs
+     """),
+    ('2018-05-22 08:57:00', 'Lucene/Solr 7.1.0 release', 'Built from tags/releases/lucene-solr/7.1.0'),
+    ('2018-05-22 11:40:00', 'Lucene/Solr 7.2.1 release', 'Built from tags/releases/lucene-solr/7.2.1'),
+    ('2018-05-22 21:59:30', 'Lucene/Solr 7.3.1 release', 'Built from tags/releases/lucene-solr/7.3.1')
 ]
 
 
