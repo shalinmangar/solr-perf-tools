@@ -23,6 +23,8 @@ def get_num_found(collection):
     solr = r.json()['response']['numFound']
     return int(solr)
 
+def run_get_output(command):
+    return str(subprocess.check_output(command))
 
 def runCommand(command):
     info('RUN: %s' % command)
