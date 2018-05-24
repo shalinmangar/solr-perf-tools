@@ -1,7 +1,7 @@
 #!/bin/python
 
 ANT_EXE = 'ant'
-GIT_EXE = 'git'
+GIT_EXE = '/usr/bin/git'
 
 GIT_REPO = 'https://github.com/apache/lucene-solr.git'
 
