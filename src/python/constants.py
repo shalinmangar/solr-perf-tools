@@ -39,3 +39,5 @@ BENCH_DIR_2 = '%s/solr' % TEST_BASE_DIR_2
 
 # These are passed to the client JVM
 CLIENT_JVM_PARAMS = ['-server', '-Xms4g', '-Xmx4g', '-XX:-TieredCompilation', '-XX:+HeapDumpOnOutOfMemoryError', '-Xbatch']
+
+BACK_TEST_SHAS = '%s/back_test_shas.pickle' % DATA_BASE_DIR
