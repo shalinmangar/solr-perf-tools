@@ -790,10 +790,13 @@ def main():
 
     if '-clean-build' in sys.argv:
         if os.path.exists(constants.CHECKOUT_DIR):
+            print('Deleting directory: %s' % constants.CHECKOUT_DIR)
             shutil.rmtree(constants.CHECKOUT_DIR)
         if os.path.exists(constants.ANT_LIB_DIR):
+            print('Deleting directory: %s' % constants.ANT_LIB_DIR)
             shutil.rmtree(constants.ANT_LIB_DIR)
         if os.path.exists(constants.IVY_LIB_CACHE):
+            print('Deleting directory: %s' % constants.IVY_LIB_CACHE)
             shutil.rmtree(constants.IVY_LIB_CACHE)
 
     solr = None
