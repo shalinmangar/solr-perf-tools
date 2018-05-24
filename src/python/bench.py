@@ -788,6 +788,14 @@ def main():
     if not os.path.exists(constants.NIGHTLY_REPORTS_DIR):
         os.makedirs(constants.NIGHTLY_REPORTS_DIR)
 
+    if '-clean-build' in sys.argv:
+        if os.path.exists(constants.CHECKOUT_DIR):
+            shutil.rmtree(constants.CHECKOUT_DIR)
+        if os.path.exists(constants.ANT_LIB_DIR):
+            shutil.rmtree(constants.ANT_LIB_DIR)
+        if os.path.exists(constants.IVY_LIB_CACHE):
+            shutil.rmtree(constants.IVY_LIB_CACHE)
+
     solr = None
     if '-revision' in sys.argv:
         index = sys.argv.index('-revision')

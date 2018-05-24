@@ -66,6 +66,7 @@ Other supported command line arguments are:
 * '-revision GIT_SHA' to run tests on a particular git sha instead of latest master
 * '-logFile /path/to/log/file' to log output to a custom location
 * '-log-by-commit-date' to log performance data by the date of the git commit instead of current date time (default)
+* '-clean-build' Deletes previous checkout directory, ant lib dir and ivy cache dir before starting
 
 ## Back testing
 
