@@ -65,6 +65,7 @@ Other supported command line arguments are:
 * '-no-report' to disable report generation
 * '-revision GIT_SHA' to run tests on a particular git sha instead of latest master
 * '-logFile /path/to/log/file' to log output to a custom location
+* '-log-by-commit-date' to log performance data by the date of the git commit instead of current date time (default)
 
 ## Running Contest
 

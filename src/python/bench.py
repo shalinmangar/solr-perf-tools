@@ -153,6 +153,17 @@ class LuceneSolrCheckout:
         finally:
             os.chdir(x)
 
+    def get_git_rev(self):
+        x = os.getcwd()
+        try:
+            os.chdir(self.checkoutDir)
+            s = utils.run_get_output([constants.GIT_EXE, 'show', '-s', '--format=%H,%ci'])
+            sha, date = s.split(',')
+            date_parts = date.split(' ')
+            return sha, datetime.datetime.strptime('%s %s' % (date_parts[0], date_parts[1]), '%Y-%m-%d %H:%M:%S')
+        finally:
+            os.chdir(x)
+
 
 class SolrServer:
     def __init__(self, tgz, extract_dir, name='', host='localhost', port='8983',
@@ -797,15 +808,23 @@ def main():
             print('Unable to send message to slackbot')
 
     runLogDir = '%s/%s' % (constants.LOG_BASE_DIR, timeStamp)
-    os.makedirs(runLogDir)
     runLogFile = '%s/output.txt' % runLogDir
 
     if '-logFile' in sys.argv:
         index = sys.argv.index('-logFile')
         runLogFile = sys.argv[index + 1]
+    else:
+        os.makedirs(runLogDir)
 
     print('Logging to %s' % runLogFile)
     solr.checkout(runLogFile)
+    sha, git_date = solr.get_git_rev()
+
+    if '-log-by-commit-date' in sys.argv:
+        start = git_date
+        timeStamp = '%04d.%02d.%02d.%02d.%02d.%02d' % (
+            git_date.year, git_date.month, git_date.day, git_date.hour, git_date.minute, git_date.second)
+
     tgz = solr.build(runLogFile)
     utils.info('Solr tgz file created at: %s' % tgz)
 
@@ -996,6 +1015,15 @@ def main():
 
     totalBenchTime = time.time() - t0
     utils.info('Total bench time: %d seconds' % totalBenchTime)
+
+    if '-logFile' not in sys.argv and '-log-by-commit-date' in sys.argv:
+        # find updated runLogDir
+        timeStamp = '%04d.%02d.%02d.%02d.%02d.%02d' % (
+            git_date.year, git_date.month, git_date.day, git_date.hour, git_date.minute, git_date.second)
+        newRunLogDir = '%s/%s' % (constants.LOG_BASE_DIR, timeStamp)
+        print('Moving logs from %s to %s' % (runLogDir, newRunLogDir))
+        shutil.move(runLogDir, newRunLogDir)
+
     if SLACK:
         try:
             slackUrl = os.environ.get('SLACK_URL')
