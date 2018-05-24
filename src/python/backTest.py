@@ -19,7 +19,7 @@ def generate_shas(start_date, end_date, delta_days):
         shas = []
         st = start_date
         while st < end_date:
-            cmd = [constants.GIT_EXE, 'rev-list', '-n', '1', '--before="%s"' % start_date.strftime('%Y-%m-%d %H:%M:%S'), 'master']
+            cmd = [constants.GIT_EXE, 'rev-list', '-n', '1', '--before="%s"' % st.strftime('%Y-%m-%d %H:%M:%S'), 'master']
             sha = utils.run_get_output(cmd)
             shas.append(sha.strip())
             st = st + delta_days
