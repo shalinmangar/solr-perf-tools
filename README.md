@@ -67,6 +67,25 @@ Other supported command line arguments are:
 * '-logFile /path/to/log/file' to log output to a custom location
 * '-log-by-commit-date' to log performance data by the date of the git commit instead of current date time (default)
 
+## Back testing
+
+Testing older versions of Solr can be done through a back testing script. You must use the lucene_solr_6x branch
+to test versions before 7.0 and master branch to test versions from 7.0 and beyond.
+
+Test all versions from start date to end date picking a version every 7 days from the start date until we reach the end date.
+The first invocation of the script lists all git SHAs to test and writes them to a file. Then the first version
+is picked and tested as usual. Each subsequent run picks the next commit available.
+
+`python src/python/backTest.py -start-date 2016.01.25.23.55.46 -end-date 2016.12.06.23.21.02 -log-by-commit-date`
+
+`python src/python/backTest.py -start-date 2016.01.25.23.55.46 -end-date 2016.12.06.23.21.02 -interval-days 10 -log-by-commit-date`
+
+Arguments supported:
+* '-start-date' the start date in '2016.01.25.23.55.46' format
+* '-end-date' the end date
+* '-interval-days' the number of days to skip to choose the next commit (default is 7 days)
+* Any additional argument is passed as-is to the bench.py script
+
 ## Running Contest
 
 `python src/python/contest.py -revision1 git_sha_here -revision2 git_sha_here -iters 10`
