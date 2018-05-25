@@ -277,6 +277,7 @@ def run_simple_bench(start, tgz, runLogFile, perfFile):
         t1 = time.time() - t0
 
         log_metrics(logFile, server, 'simple_bench')
+        log_sys_stats(logFile, 'simple_bench')
 
         bytesIndexed = os.stat(constants.IMDB_DATA_FILE).st_size
         docsIndexed = utils.get_num_found(constants.SOLR_COLLECTION_NAME)
@@ -481,6 +482,7 @@ def run_wiki_schemaless_bench(start, tgz, runLogFile, perfFile, gcFile):
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = results.get_simple_results()
 
         log_metrics(logFile, server, 'wiki_schemaless_bench')
+        log_sys_stats(logFile, 'wiki_schemaless_bench')
 
         if docsIndexed != constants.WIKI_1K_NUM_DOCS:
             raise RuntimeError(
@@ -543,6 +545,7 @@ def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = results.get_simple_results()
 
         log_metrics(logFile, server, 'wiki_1k_schema_bench')
+        log_sys_stats(logFile, 'wiki_1k_schema_bench')
 
         if docsIndexed != constants.WIKI_1K_NUM_DOCS:
             raise RuntimeError(
@@ -561,6 +564,16 @@ def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
     finally:
         server.stop()
         time.sleep(10)
+
+
+def log_sys_stats(logfile, bench_name):
+    vmstat = utils.run_get_output(['vmstat'])
+    iostat = utils.run_get_output(['iostat'])
+    with open(logfile, 'a+') as f:
+        f.write('--- SYSTEM STATS AFTER %s ---\n' % bench_name)
+        f.write(vmstat)
+        f.write('\n')
+        f.write(iostat)
 
 
 def log_metrics(logFile, server, bench_name):
@@ -620,6 +633,7 @@ def run_wiki_4k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
         bytesIndexed, indexTimeSec, docsIndexed, times, garbage, peak = results.get_simple_results()
 
         log_metrics(logFile, server, 'wiki_4k_schema_bench')
+        log_sys_stats(logFile, 'wiki_4k_schema_bench')
 
         if docsIndexed != constants.WIKI_4k_NUM_DOCS:
             raise RuntimeError(
@@ -715,6 +729,7 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile, col
 
         log_metrics(logFile, server, 'wiki_1k_schema_cloud_bench_8983')
         log_metrics(logFile, server2, 'wiki_1k_schema_cloud_bench_8984')
+        log_sys_stats(logFile, 'wiki_1k_schema_cloud')
 
         if docsIndexed != constants.WIKI_1K_NUM_DOCS:
             raise RuntimeError(
@@ -840,6 +855,8 @@ def main():
 
     tgz = solr.build(runLogFile)
     utils.info('Solr tgz file created at: %s' % tgz)
+
+    log_sys_stats(runLogFile, 'startup')
 
     implVersion = ''
 
