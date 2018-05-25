@@ -251,7 +251,7 @@ class SolrServer:
 
     def get_metrics(self):
         r = requests.get('http://%s:%s/solr/admin/metrics?wt=json&indent=on' % (self.host, self.port))
-        return r.text
+        return r
 
     def get_cluster_state(self):
         r = requests.get('http://%s:%s/solr/admin/collections?action=clusterstatuswt=json&indent=on' % (self.host, self.port))
@@ -565,10 +565,12 @@ def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
 
 
 def log_metrics(logFile, server, bench_name):
-    with open(logFile, 'a+') as f:
-        f.write('--- BEGIN SOLR METRICS AFTER %s ---\n' % bench_name)
-        f.write(server.get_metrics())
-        f.write('--- END SOLR METRICS AFTER %s ---\n' % bench_name)
+    metrics = server.get_metrics()
+    if metrics.status_code == requests.codes.ok:
+        with open(logFile, 'a+') as f:
+            f.write('--- BEGIN SOLR METRICS AFTER %s ---\n' % bench_name)
+            f.write(metrics.text)
+            f.write('--- END SOLR METRICS AFTER %s ---\n' % bench_name)
 
 
 def run_wiki_4k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
