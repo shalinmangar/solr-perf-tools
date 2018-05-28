@@ -30,7 +30,7 @@ def getOneGraphHTML(annotations, id, data, yLabel, title, errorBars=True):
     l = []
     w = l.append
     series = data[0].split(',')[1]
-    w('<div id="%s" style="width:800px;height:400px"></div>' % id)
+    w('<div id="%s" style="height:70%; width: 98%"></div>' % id)
     w('<script type="text/javascript">')
     w(onClickJS)
     w('  g_%s = new Dygraph(' % id)
@@ -44,7 +44,6 @@ def getOneGraphHTML(annotations, id, data, yLabel, title, errorBars=True):
     options.append('ylabel: "%s"' % yLabel)
     options.append('labelsKMB: true')
     options.append('labelsSeparateLines: true')
-    options.append('labelsDivWidth: 700')
     options.append('clickCallback: doClick')
     options.append("labelsDivStyles: {'background-color': 'transparent'}")
     if False:
