@@ -30,7 +30,7 @@ def getOneGraphHTML(annotations, id, data, yLabel, title, errorBars=True):
     l = []
     w = l.append
     series = data[0].split(',')[1]
-    w('<div id="%s" style="height:70%%; width: 98%%"></div>' % id)
+    w('<div id="%s" style="height:70%%; width: 90%%"></div>' % id)
     w('<script type="text/javascript">')
     w(onClickJS)
     w('  g_%s = new Dygraph(' % id)
