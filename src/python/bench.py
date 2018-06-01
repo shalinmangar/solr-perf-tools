@@ -73,17 +73,16 @@ KNOWN_CHANGES = [
      methods. This deep copy has been removed to optimize the common case. This change only affects JSON indexing
      and therefore only the IMDB benchmark.
      """),
-    ('2018-05-22 01:11:16', 'Lucene/Solr 6.4.2 release', 'Built from tags/releases/lucene-solr/6.4.2'),
-    ('2018-05-22 03:01:58', 'Lucene/Solr 6.5.1 release', 'Built from tags/releases/lucene-solr/6.5.1'),
-    ('2018-05-22 04:53:12', 'Lucene/Solr 6.6.4 release', 'Built from tags/releases/lucene-solr/6.6.4'),
-    ('2018-05-22 07:12:16', 'Lucene/Solr 7.0.1 release',
+    ('2017-01-07', 'SOLR-9854: Collect metrics for index merges and index store IO',
      """
-     Lucene/Solr 7.0.1 release. Switched timesecnum from tint to pint and date field to pdate
-     The _default configset is used instead of data_driven_schema_configs
+     Using API for metrics management developed in SOLR-4735 we should also start collecting metrics for major aspects
+     of IndexWriter operation, such as read / write IO rates, number of minor and major merges and IO during 
+     these operations, etc. This will provide a better insight into resource consumption and load at the IO level
      """),
-    ('2018-05-22 08:57:00', 'Lucene/Solr 7.1.0 release', 'Built from tags/releases/lucene-solr/7.1.0'),
-    ('2018-05-22 11:40:00', 'Lucene/Solr 7.2.1 release', 'Built from tags/releases/lucene-solr/7.2.1'),
-    ('2018-05-22 21:59:30', 'Lucene/Solr 7.3.1 release', 'Built from tags/releases/lucene-solr/7.3.1')
+    ('2017-02-19', 'SOLR-10130: Serious performance degradation in Solr 6.4.1 due to the new metrics collection',
+     """
+     New metrics collection system in MetricsDirectoryFactory added in SOLR-9854 caused a major slowdown.
+     """)
 ]
 
 
