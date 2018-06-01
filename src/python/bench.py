@@ -83,7 +83,7 @@ KNOWN_CHANGES = [
      """
      New metrics collection system in MetricsDirectoryFactory added in SOLR-9854 caused a major slowdown.
      """),
-    ('2018-05-31', 'Set swappiness to 0 (was 60)', 'vm.swappiness was set to 0 from its default value of 60')
+    ('2018-05-30 20:48:51', 'Set swappiness to 0 (was 60)', 'vm.swappiness was set to 0 from its default value of 60')
 ]
 
 
