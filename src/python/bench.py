@@ -82,7 +82,8 @@ KNOWN_CHANGES = [
     ('2017-02-19', 'SOLR-10130: Serious performance degradation in Solr 6.4.1 due to the new metrics collection',
      """
      New metrics collection system in MetricsDirectoryFactory added in SOLR-9854 caused a major slowdown.
-     """)
+     """),
+    ('2018-05-31', 'Set swappiness to 0 (was 60)', 'vm.swappiness was set to 0 from its default value of 60')
 ]
 
 
