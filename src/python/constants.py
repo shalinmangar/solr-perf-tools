@@ -42,5 +42,5 @@ CLIENT_JVM_PARAMS = ['-server', '-Xms4g', '-Xmx4g', '-XX:-TieredCompilation', '-
 
 BACK_TEST_SHAS = '%s/back_test_shas.pickle' % DATA_BASE_DIR
 
-ANT_LIB_DIR = '~/.ant/lib'
-IVY_LIB_CACHE = '~/.ivy2/cache'
+ANT_LIB_DIR = '/home/shalin/.ant/lib'
+IVY_LIB_CACHE = '/home/shalin/.ivy2/cache'
