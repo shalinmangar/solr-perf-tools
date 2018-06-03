@@ -114,7 +114,8 @@ public final class WikiIndexer {
       ConcurrentUpdateSolrClient c = new ConcurrentUpdateSolrClient.Builder(solrUrl)
               .withQueueSize(batchSize * 2)
               .withThreadCount(numThreads)
-              .withResponseParser(new BinaryResponseParser()).build();
+              .build();
+      c.setParser(new BinaryResponseParser());
       c.setRequestWriter(new BinaryRequestWriter());
       c.setPollQueueTime(0);
       client = c;
