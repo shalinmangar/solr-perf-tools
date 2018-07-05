@@ -273,7 +273,8 @@ class FusionServer:
         x = os.getcwd()
         try:
             os.chdir(self.extract_dir)
-            cmd = ['%s/bin/fusion' % self.extract_dir, 'start']
+            fusion_dir = os.listdir(self.extract_dir)[0]
+            cmd = ['%s/%s/bin/fusion' % (self.extract_dir, fusion_dir), 'start']
             utils.info('Running fusion with command: %s' % ' '.join(cmd))
             utils.runComand('start fusion', cmd, '%s' % runLogFile)
         finally:
@@ -283,7 +284,8 @@ class FusionServer:
         x = os.getcwd()
         try:
             os.chdir(self.extract_dir)
-            cmd = ['%s/bin/fusion' % self.extract_dir, 'stop']
+            fusion_dir = os.listdir(self.extract_dir)[0]
+            cmd = ['%s/%s/bin/fusion' % (self.extract_dir, fusion_dir), 'start']
             utils.info('Stopping fusion with command: %s' % ' '.join(cmd))
             utils.runComand('stop fusion', cmd, '%s' % runLogFile)
         finally:
