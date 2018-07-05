@@ -311,6 +311,22 @@ class FusionServer:
             if app_name == app['name']:
                 return FusionApp(password, app['id'], app['name'], app['description'])
 
+    def get_version_commit(self):
+        build_file = '%s/fusion.build' % self.fusion_dir
+
+        version = ''
+        commit_sha = ''
+        if os.path.exists(build_file):
+            with open(build_file, 'r') as f:
+                lines = [line.rstrip('\n') for line in f]
+                for s in lines:
+                    if s.startswith('fusion.version'):
+                        version = s[1 + s.find('='):]
+                    elif s.startswith('fusion.commit'):
+                        commit_sha = s[1 + s.find('='):]
+        return (version, commit_sha)
+
+
 class FusionApp:
     def __init__(self, password, app_id, app_name, app_description):
         self.password = password
@@ -323,6 +339,49 @@ class FusionApp:
         print('Indexing json file to fusion using command: %s' % ' '.join(cmd))
         utils.runComand('index json file', cmd, runLogFile)
 
+    def query(self, q):
+        r = requests.get('http://localhost:8764/api/%s/query/%s?q=%s' % (self.id, self.id, q), auth=('admin', self.password))
+        return r.json()
+
+    def get_num_found(self, q):
+        j = self.query(q)
+        return int(j['response']['numFound'])
+
+
+def run_fusion_bench(start, tgz, runLogFile, perfFile):
+    server = FusionServer(tgz, '%s/fusion' % constants.BENCH_DIR, 'fusion')
+    server.extract(runLogFile)
+    try:
+        fusion_version, fusion_commit = server.get_version_commit()
+        server.start(runLogFile)
+        time.sleep(10)
+        password = 'fusion2018'
+        server.set_admin_password(password)
+        app = server.create_app(password, 'fusion_simple', 'a simple fusion app')
+
+        t0 = time.time()
+        app.curl_index_json_file(constants.IMDB_DATA_FILE, runLogFile)
+        t1 = time.time() - t0
+
+        bytesIndexed = os.stat(constants.IMDB_DATA_FILE).st_size
+        docsIndexed = app.get_num_found('*:*')
+
+        if docsIndexed != constants.IMDB_NUM_DOCS:
+            raise RuntimeError(
+                'Indexed num_docs do not match expected %d != found %d' % (constants.IMDB_NUM_DOCS, docsIndexed))
+
+        print ('      %.1f s' % (t1))
+        if not NOREPORT:
+            with open(perfFile, 'a+') as f:
+                timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
+                    start.year, start.month, start.day, start.hour, start.minute, start.second)
+                f.write('%s,%d,%d,%.1f,%s,%s\n' % (
+                    timeStampLoggable, bytesIndexed, docsIndexed, t1, fusion_version, fusion_commit))
+
+        return bytesIndexed, docsIndexed, t1
+    finally:
+        server.stop(runLogFile)
+        time.sleep(10)
 
 def run_simple_bench(start, tgz, runLogFile, perfFile):
     server = SolrServer(tgz, '%s/simple' % constants.BENCH_DIR, example='schemaless', memory='2g')
