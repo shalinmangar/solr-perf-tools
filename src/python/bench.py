@@ -312,7 +312,7 @@ class FusionServer:
                 return FusionApp(password, app['id'], app['name'], app['description'])
 
     def get_version_commit(self):
-        build_file = '%s/fusion.build' % self.fusion_dir
+        build_file = '%s/%s/fusion.build' % (self.extract_dir, self.fusion_dir)
 
         version = ''
         commit_sha = ''
