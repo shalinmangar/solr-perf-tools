@@ -335,12 +335,12 @@ class FusionApp:
         self.description = app_description
 
     def curl_index_json_file(self, json_file_path, runLogFile):
-        cmd = ['curl', '-u', 'admin:%s' % self.password, '-X', "POST", 'http://localhost:8764/api/apps/%s/index/%s?echo=false' % (self.id, self.id), '--data-binary', '@%s' % json_file_path]
+        cmd = ['curl', '-u', 'admin:%s' % self.password, '-X', "POST", '-H', 'Content-type: application/json', 'http://localhost:8764/api/apps/%s/index/%s?echo=false' % (self.id, self.id), '--data-binary', '@%s' % json_file_path]
         print('Indexing json file to fusion using command: %s' % ' '.join(cmd))
         utils.runComand('index json file', cmd, runLogFile)
 
     def query(self, q):
-        r = requests.get('http://localhost:8764/api/%s/query/%s?q=%s' % (self.id, self.id, q), auth=('admin', self.password))
+        r = requests.get('http://localhost:8764/api/query/%s?q=%s' % (self.id, q), auth=('admin', self.password))
         return r.json()
 
     def get_num_found(self, q):
