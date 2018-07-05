@@ -268,12 +268,12 @@ class FusionServer:
         os.makedirs(self.extract_dir)
         utils.runCommand(
             'tar xvf %s -C %s --strip-components=1 >> %s 2>&1' % (self.tgz, self.extract_dir, runLogFile))
+        self.fusion_dir = os.listdir(self.extract_dir)[0]
 
     def start(self, runLogFile):
         x = os.getcwd()
         try:
             os.chdir(self.extract_dir)
-            self.fusion_dir = os.listdir(self.extract_dir)[0]
             cmd = ['%s/%s/bin/fusion' % (self.extract_dir, self.fusion_dir), 'start']
             utils.info('Running fusion with command: %s' % ' '.join(cmd))
             utils.runComand('start fusion', cmd, '%s' % runLogFile)
