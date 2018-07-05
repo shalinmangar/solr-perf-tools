@@ -356,12 +356,17 @@ def run_fusion_bench(start, tgz, runLogFile, perfFile):
         server.start(runLogFile)
         time.sleep(10)
         password = 'fusion2018'
+        print('setting password')
         server.set_admin_password(password)
+        print('creating app')
         app = server.create_app(password, 'fusion_simple', 'a simple fusion app')
 
+        print('starting indexing')
         t0 = time.time()
         app.curl_index_json_file(constants.IMDB_DATA_FILE, runLogFile)
         t1 = time.time() - t0
+
+        print('took time %d' % t1)
 
         bytesIndexed = os.stat(constants.IMDB_DATA_FILE).st_size
         docsIndexed = app.get_num_found('*:*')
