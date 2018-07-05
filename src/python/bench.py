@@ -305,6 +305,11 @@ class FusionServer:
         resp = r.json()
         return FusionApp(password, resp['id'], resp['name'], resp['description'])
 
+    def get_app(self, password, app_name):
+        apps = self.list_apps(password)
+        for app in apps:
+            if app_name == app['name']:
+                return FusionApp(password, app['id'], app['name'], app['description'])
 
 class FusionApp:
     def __init__(self, password, app_id, app_name, app_description):
