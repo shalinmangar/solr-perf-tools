@@ -360,6 +360,7 @@ def run_fusion_bench(start, tgz, runLogFile, perfFile):
         server.set_admin_password(password)
         print('creating app')
         app = server.create_app(password, 'fusion_simple', 'a simple fusion app')
+        time.sleep(10)
 
         print('starting indexing')
         t0 = time.time()
