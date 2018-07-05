@@ -1,15 +1,14 @@
 #!/bin/python
 
+import datetime
 import glob
 import os
 import re
-import shutil
-import traceback
-
-import datetime
 import requests
+import shutil
 import sys
 import time
+import traceback
 
 import constants
 import graphutils
@@ -256,6 +255,67 @@ class SolrServer:
     def get_cluster_state(self):
         r = requests.get('http://%s:%s/solr/admin/collections?action=clusterstatuswt=json&indent=on' % (self.host, self.port))
         return r.text
+
+
+class FusionServer:
+    def __init__(self, tgz, extract_dir, name=''):
+        self.tgz = tgz
+        self.extract_dir = extract_dir
+
+    def extract(self, runLogFile):
+        if os.path.exists(self.extract_dir):
+            shutil.rmtree(self.extract_dir)
+        os.makedirs(self.extract_dir)
+        utils.runCommand(
+            'tar xvf %s -C %s --strip-components=1 >> %s 2>&1' % (self.tgz, self.extract_dir, runLogFile))
+
+    def start(self, runLogFile):
+        x = os.getcwd()
+        try:
+            os.chdir(self.extract_dir)
+            cmd = ['%s/bin/fusion' % self.extract_dir, 'start']
+            utils.info('Running fusion with command: %s' % ' '.join(cmd))
+            utils.runComand('start fusion', cmd, '%s' % runLogFile)
+        finally:
+            os.chdir(x)
+
+    def stop(self, runLogFile):
+        x = os.getcwd()
+        try:
+            os.chdir(self.extract_dir)
+            cmd = ['%s/bin/fusion' % self.extract_dir, 'stop']
+            utils.info('Stopping fusion with command: %s' % ' '.join(cmd))
+            utils.runComand('stop fusion', cmd, '%s' % runLogFile)
+        finally:
+            os.chdir(x)
+
+    def set_admin_password(self, password):
+        payload = {'password' : password}
+        r = requests.post('http://localhost:8764/api', json=payload)
+        return r
+
+    def list_apps(self, password):
+        r = requests.get('http://localhost:8764/api/apps', auth=('admin', password))
+        return r.json()
+
+    def create_app(self, password, app_name, app_description):
+        payload = {'name' : app_name, 'description' : app_description}
+        r = requests.post('http://localhost:8764/api/apps', auth=('admin', password), json=payload)
+        resp = r.json()
+        return FusionApp(password, resp['id'], resp['name'], resp['description'])
+
+
+class FusionApp:
+    def __init__(self, password, app_id, app_name, app_description):
+        self.password = password
+        self.id = app_id
+        self.name = app_name
+        self.description = app_description
+
+    def curl_index_json_file(self, json_file_path, runLogFile):
+        cmd = ['curl', '-u', 'admin:%s' % self.password, '-X', "POST", 'http://localhost:8764/api/apps/%s/index/%s?echo=false' % (self.id, self.id), '--data-binary', '@%s' % json_file_path]
+        print('Indexing json file to fusion using command: %s' % ' '.join(cmd))
+        utils.runComand('index json file', cmd, runLogFile)
 
 
 def run_simple_bench(start, tgz, runLogFile, perfFile):
