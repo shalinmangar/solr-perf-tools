@@ -324,7 +324,7 @@ class FusionServer:
                         version = s[1 + s.find('='):]
                     elif s.startswith('fusion.commit'):
                         commit_sha = s[1 + s.find('='):]
-        return (version, commit_sha)
+        return version, commit_sha
 
 
 class FusionApp:
@@ -369,6 +369,10 @@ def run_fusion_bench(start, tgz, runLogFile, perfFile):
 
         print('took time %d' % t1)
 
+        # give fusion some time to flush its queues
+        # todo figure out why this is needed at all?
+        time.sleep(20)
+
         bytesIndexed = os.stat(constants.IMDB_DATA_FILE).st_size
         docsIndexed = app.get_num_found('*:*')
 
@@ -376,7 +380,7 @@ def run_fusion_bench(start, tgz, runLogFile, perfFile):
             raise RuntimeError(
                 'Indexed num_docs do not match expected %d != found %d' % (constants.IMDB_NUM_DOCS, docsIndexed))
 
-        print ('      %.1f s' % (t1))
+        print ('      %.1f s' % t1)
         if not NOREPORT:
             with open(perfFile, 'a+') as f:
                 timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
@@ -417,7 +421,7 @@ def run_simple_bench(start, tgz, runLogFile, perfFile):
             raise RuntimeError(
                 'Indexed num_docs do not match expected %d != found %d' % (constants.IMDB_NUM_DOCS, docsIndexed))
 
-        print ('      %.1f s' % (t1))
+        print ('      %.1f s' % t1)
         if not NOREPORT:
             with open(perfFile, 'a+') as f:
                 timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
