@@ -106,11 +106,11 @@ class LuceneSolrCheckout:
                 # clone
                 if self.revision == 'LATEST':
                     utils.runCommand(
-                        '%s clone --progress %s . >> %s 2>&1' % (
+                        '%s clone %s . >> %s 2>&1' % (
                             constants.GIT_EXE, constants.GIT_REPO, runLogFile))
                 else:
                     utils.runCommand(
-                        '%s clone --progress %s .  >> %s 2>&1' % (
+                        '%s clone %s .  >> %s 2>&1' % (
                             constants.GIT_EXE, constants.GIT_REPO, runLogFile))
                     self.updateToRevision(runLogFile)
                 try:
@@ -860,8 +860,23 @@ def main():
 
     implVersion = ''
 
+    all_tests = ['simple', 'wiki_1k_schema', 'wiki_4k_schema', 'wiki_1k_schema_cloud', 'wiki_1k_schema_cloud1x2']
+    run_tests = []
+    if '-run-tests' in sys.argv:
+        index = sys.argv.index('-run-tests')
+        test_names = str(sys.argv[index + 1])
+        run_tests = test_names.split(',')
+        for x in run_tests:
+            if x not in all_tests:
+                raise Exception('test name %s not found in list of supported tests: %s' % (x, all_tests))
+    else:
+        run_tests.extend(all_tests)
+
     simplePerfFile = '%s/simpleIndexer.perfdata.txt' % constants.LOG_BASE_DIR
-    simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken = run_simple_bench(start, tgz, runLogFile, simplePerfFile)
+
+    if 'simple' in run_tests:
+        simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken = run_simple_bench(start, tgz, runLogFile, simplePerfFile)
+
     simpleIndexChartData = []
     annotations = []
     if os.path.isfile(simplePerfFile):
@@ -898,9 +913,12 @@ def main():
 
     wiki1kSchemaPerfFile = '%s/wiki_1k_schema.perfdata.txt' % constants.LOG_BASE_DIR
     wiki1kSchemaGcFile = '%s/wiki_1k_schema.gc.txt' % constants.LOG_BASE_DIR
-    wiki1kBytesIndexed, wiki1kIndexTimeSec, wiki1kDocsIndexed, \
-    wiki1kTimes, wiki1kGarbage, wiki1kPeak = run_wiki_1k_schema_bench(start, tgz, runLogFile, wiki1kSchemaPerfFile,
-                                                                      wiki1kSchemaGcFile)
+
+    if 'wiki_1k_schema' in run_tests:
+        wiki1kBytesIndexed, wiki1kIndexTimeSec, wiki1kDocsIndexed, \
+        wiki1kTimes, wiki1kGarbage, wiki1kPeak = run_wiki_1k_schema_bench(start, tgz, runLogFile, wiki1kSchemaPerfFile,
+                                                                          wiki1kSchemaGcFile)
+
     wiki1kSchemaIndexChartData = []
     wiki1kSchemaIndexDocsSecChartData = []
     wiki1kSchemaGcTimesChartData = []
@@ -927,8 +945,11 @@ def main():
 
     wiki4kSchemaPerfFile = '%s/wiki_4k_schema.perfdata.txt' % constants.LOG_BASE_DIR
     wiki4kGcFile = '%s/wiki_4k_schema.gc.txt' % constants.LOG_BASE_DIR
-    wiki4kBytesIndexed, wiki4kIndexTimeSec, wiki4kDocsIndexed, \
-    wiki4kTimes, wiki4kGarbage, wiki4kPeak = run_wiki_4k_schema_bench(start, tgz, runLogFile, wiki4kSchemaPerfFile, wiki4kGcFile)
+
+    if 'wiki_4k_schema' in run_tests:
+        wiki4kBytesIndexed, wiki4kIndexTimeSec, wiki4kDocsIndexed, \
+        wiki4kTimes, wiki4kGarbage, wiki4kPeak = run_wiki_4k_schema_bench(start, tgz, runLogFile, wiki4kSchemaPerfFile, wiki4kGcFile)
+
     wiki4kSchemaIndexChartData = []
     wiki4kSchemaIndexDocsSecChartData = []
 
