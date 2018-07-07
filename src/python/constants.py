@@ -4,6 +4,7 @@ ANT_EXE = 'ant'
 GIT_EXE = '/usr/bin/git'
 
 GIT_REPO = 'https://github.com/apache/lucene-solr.git'
+FUSION_GIT_REPO = 'git@github.com:lucidworks/Fusion.git'
 
 TEST_BASE_DIR_1 = '/solr-bench'
 TEST_BASE_DIR_2 = '/solr-bench2'
