@@ -347,6 +347,26 @@ class FusionApp:
         j = self.query(q)
         return int(j['response']['numFound'])
 
+    def get_index_pipeline(self):
+        r = requests.get('http://localhost:8764/api/index-pipeline/%s' % (self.id), auth=('admin', self.password))
+        return r.json()
+
+    def put_index_pipeline(self, index_pipeline):
+        r = requests.put('http://localhost:8764/api/index-pipeline/%s' % self.id, auth=('admin', self.password), json=index_pipeline)
+        return r.json()
+
+    def refresh_pipeline(self):
+        r = requests.put('http://localhost:8764/api/index-pipeline/%s/refresh' % self.id, auth=('admin', self.password))
+        return r.json
+
+    def set_buffer_docs_for_solr(self, buffer_docs):
+        j = self.get_index_pipeline()
+        for stage in j['stages']:
+            if 'solr-index' == stage['type']:
+                stage['bufferDocsForSolr'] = buffer_docs
+        self.put_index_pipeline(j)
+        self.refresh_pipeline()
+
 
 def run_fusion_bench(start, tgz, runLogFile, perfFile):
     server = FusionServer(tgz, '%s/fusion' % constants.BENCH_DIR, 'fusion')
