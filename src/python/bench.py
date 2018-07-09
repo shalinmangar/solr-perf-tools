@@ -381,6 +381,7 @@ def run_fusion_bench(start, tgz, runLogFile, perfFile):
         print('creating app')
         app = server.create_app(password, 'fusion_simple', 'a simple fusion app')
         time.sleep(10)
+        app.set_buffer_docs_for_solr(True)
 
         print('starting indexing')
         t0 = time.time()
