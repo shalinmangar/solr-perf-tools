@@ -348,15 +348,15 @@ class FusionApp:
         return int(j['response']['numFound'])
 
     def get_index_pipeline(self):
-        r = requests.get('http://localhost:8764/api/index-pipeline/%s' % (self.id), auth=('admin', self.password))
+        r = requests.get('http://localhost:8764/api/index-pipelines/%s' % (self.id), auth=('admin', self.password))
         return r.json()
 
     def put_index_pipeline(self, index_pipeline):
-        r = requests.put('http://localhost:8764/api/index-pipeline/%s' % self.id, auth=('admin', self.password), json=index_pipeline)
+        r = requests.put('http://localhost:8764/api/index-pipelines/%s' % self.id, auth=('admin', self.password), json=index_pipeline)
         return r.json()
 
     def refresh_pipeline(self):
-        r = requests.put('http://localhost:8764/api/index-pipeline/%s/refresh' % self.id, auth=('admin', self.password))
+        r = requests.put('http://localhost:8764/api/index-pipelines/%s/refresh' % self.id, auth=('admin', self.password))
         return r.json
 
     def set_buffer_docs_for_solr(self, buffer_docs):
