@@ -341,7 +341,7 @@ class FusionApp:
 
     def curl_index_json_file(self, json_file_path, runLogFile):
         cmd = ['curl', '-u', 'admin:%s' % self.password, '-X', "POST", '-H', 'Content-type: application/json',
-               'http://localhost:8764/api/apps/%s/index/%s?echo=false' % (self.id, self.id),
+               'http://localhost:8764/api/apps/%s/index/%s?echo=false&bufferDocsForSolr=true' % (self.id, self.id),
                '--data-binary', '@%s' % json_file_path]
         print('Indexing json file to fusion using command: %s' % ' '.join(cmd))
         utils.runComand('index json file', cmd, runLogFile)
@@ -393,7 +393,7 @@ def run_fusion_bench(start, tgz, runLogFile, perfFile):
         print('creating app')
         app = server.create_app(password, 'fusion_simple', 'a simple fusion app')
         time.sleep(10)
-        app.set_buffer_docs_for_solr(True)
+        #app.set_buffer_docs_for_solr(True)
 
         print('starting indexing')
         t0 = time.time()
