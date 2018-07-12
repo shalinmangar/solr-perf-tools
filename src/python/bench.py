@@ -326,6 +326,11 @@ class FusionServer:
                         commit_sha = s[1 + s.find('='):]
         return version, commit_sha
 
+    def add_search_cluster(self, password, id, connect_string, cloud_mode=True, buffer_commit_within=10000, buffer_flush_interval=1000, buffer_size=100, concurrency=8):
+        payload = {'id' : id, 'connectString' : connect_string, 'cloud' : cloud_mode, 'bufferCommitWithin' : buffer_commit_within, 'bufferFlushInterval' : buffer_flush_interval, 'bufferSize' : buffer_size, 'concurrency' : concurrency}
+        r = requests.post('http://localhost:8764/api/searchCluster', auth=('admin', password), json=payload)
+        return r.json()
+
 
 class FusionApp:
     def __init__(self, password, app_id, app_name, app_description):
@@ -369,6 +374,11 @@ class FusionApp:
         self.put_index_pipeline(j)
         self.refresh_pipeline()
 
+    def create_collection(self, id, solr_params, search_cluster_id='default'):
+        payload = {'id' : id, 'solrParams' : solr_params, 'searchClusterId' : search_cluster_id}
+        r = requests.post('http://localhost:8764/api/apps/%s/collections' % self.id, auth=('admin', self.password),
+                          json=payload)
+        return r.json()
 
 def run_fusion_bench(start, tgz, runLogFile, perfFile):
     server = FusionServer(tgz, '%s/fusion' % constants.BENCH_DIR, 'fusion')
