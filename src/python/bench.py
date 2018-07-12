@@ -270,21 +270,37 @@ class FusionServer:
             'tar xvf %s -C %s --strip-components=1 >> %s 2>&1' % (self.tgz, self.extract_dir, runLogFile))
         self.fusion_dir = os.listdir(self.extract_dir)[0]
 
-    def start(self, runLogFile):
+    def start(self, runLogFile, service_names = None):
+        """Start the fusion instance
+
+        Keyword arguments:
+        runLogFile -- the log file to which messages should be appended
+        service_name -- a list of service names such as zk, solr etc to start, defaults to starting all services
+        """
         x = os.getcwd()
         try:
             os.chdir(self.extract_dir)
             cmd = ['%s/%s/bin/fusion' % (self.extract_dir, self.fusion_dir), 'start']
+            if service_names is not None:
+                cmd.extend(service_names)
             utils.info('Running fusion with command: %s' % ' '.join(cmd))
             utils.runComand('start fusion', cmd, '%s' % runLogFile)
         finally:
             os.chdir(x)
 
-    def stop(self, runLogFile):
+    def stop(self, runLogFile, service_names = None):
+        """Stop the fusion instance
+
+        Keyword arguments:
+        runLogFile -- the log file to which messages should be appended
+        service_name -- a list of service names such as zk, solr etc to stop, defaults to stopping all services
+        """
         x = os.getcwd()
         try:
             os.chdir(self.extract_dir)
             cmd = ['%s/%s/bin/fusion' % (self.extract_dir, self.fusion_dir), 'stop']
+            if service_names is not None:
+                cmd.extend(service_names)
             utils.info('Stopping fusion with command: %s' % ' '.join(cmd))
             utils.runComand('stop fusion', cmd, '%s' % runLogFile)
         finally:
@@ -385,7 +401,8 @@ def run_fusion_bench(start, tgz, runLogFile, perfFile):
     server.extract(runLogFile)
     try:
         fusion_version, fusion_commit = server.get_version_commit()
-        server.start(runLogFile)
+        service_names = 'zookeeper solr api connectors-classic connectors-rpc proxy webapps admin-ui'.split(' ')
+        server.start(runLogFile, service_names)
         time.sleep(10)
         password = 'fusion2018'
         print('setting password')
