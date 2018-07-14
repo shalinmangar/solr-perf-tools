@@ -411,7 +411,6 @@ def run_fusion_bench(start, tgz, runLogFile, perfFile):
         print('creating app')
         app = server.create_app(password, 'fusion_simple', 'a simple fusion app')
         time.sleep(10)
-        #app.set_buffer_docs_for_solr(True)
 
         print('starting indexing')
         t0 = time.time()
@@ -421,7 +420,7 @@ def run_fusion_bench(start, tgz, runLogFile, perfFile):
         print('took time %d' % t1)
 
         # give fusion some time to flush its queues
-        # todo figure out why this is needed at all?
+        # fusion uses a commitWithin=10s by default so we wait longer
         time.sleep(20)
 
         bytesIndexed = os.stat(constants.IMDB_DATA_FILE).st_size
