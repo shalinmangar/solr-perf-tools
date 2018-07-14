@@ -273,3 +273,22 @@ def writeIndexingHTML(annotations, chart_data):
     writeKnownChanges(annotations, w)
     footer(w)
     f.close()
+
+
+def writeFusionIndexingHTML(annotations, chart_data):
+    simpleIndexChartData = chart_data[0]
+    f = open('%s/fusion-indexing.html' % constants.NIGHTLY_REPORTS_DIR, 'wb')
+    w = f.write
+    header(w, 'Fusion nightly indexing benchmark')
+    w('<h1>Indexing Throughput</h1>\n')
+    w('<br>')
+    w('<ul>')
+    w('<li><a href="#SimpleSchemalessIndex">IMDB JSON dataset (649MB, 2436442 docs) indexed via Index Profile API using default schemaless mode</a></li>')
+    w('</ul>')
+    w(getOneGraphHTML(annotations, 'SimpleSchemalessIndex', simpleIndexChartData, "JSON MB/sec", "IMDB",
+                      errorBars=False))
+    w('<br>')
+    w('<br>')
+    writeKnownChanges(annotations, w)
+    footer(w)
+    f.close()
