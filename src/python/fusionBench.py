@@ -50,6 +50,14 @@ def main():
     runLogDir = '%s/%s' % (constants.LOG_BASE_DIR, timeStamp)
     runLogFile = '%s/output.txt' % runLogDir
 
+    if '-logFile' in sys.argv:
+        index = sys.argv.index('-logFile')
+        runLogFile = sys.argv[index + 1]
+    else:
+        os.makedirs(runLogDir)
+
+    print('Logging to %s' % runLogFile)
+
     if ONLYREPORT:
         generate_report(simplePerfFile)
         return
