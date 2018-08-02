@@ -12,6 +12,11 @@ Make sure your system has the following installed and in your path:
 * ant
 * [python requests module](http://docs.python-requests.org/en/master/user/install/)
 
+You can also use virtualenv using
+```bash
+pip install -r requirements.txt
+```
+
 ## Configuring
 
 The benchmark requires a few directories to be available:
