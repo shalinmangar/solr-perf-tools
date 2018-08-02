@@ -164,6 +164,78 @@ class LuceneSolrCheckout:
             os.chdir(x)
 
 
+class FusionCheckout:
+    def __init__(self, checkoutDir, revision='LATEST'):
+        self.checkoutDir = checkoutDir
+        self.revision = revision
+
+    def checkout(self, runLogFile):
+        utils.info(
+            'Attempting to checkout Fusion revision: %s into directory: %s' % (
+                self.revision, self.checkoutDir))
+        if not os.path.exists(self.checkoutDir):
+            os.makedirs(self.checkoutDir)
+        f = os.listdir(self.checkoutDir)
+        x = os.getcwd()
+        try:
+            os.chdir(self.checkoutDir)
+            if len(f) == 0:
+                # clone
+                if self.revision == 'LATEST':
+                    utils.runCommand(
+                        '%s clone %s . >> %s 2>&1' % (
+                            constants.GIT_EXE, constants.GIT_REPO, runLogFile))
+                else:
+                    utils.runCommand(
+                        '%s clone %s .  >> %s 2>&1' % (
+                            constants.GIT_EXE, constants.GIT_REPO, runLogFile))
+                    self.updateToRevision(runLogFile)
+            else:
+                self.updateToRevision(runLogFile)
+        finally:
+            os.chdir(x)
+
+    def updateToRevision(self, runLogFile):
+        # resets any staged changes (there shouldn't be any though)
+        utils.runCommand('%s reset --hard' % constants.GIT_EXE)
+        # clean ANY files not tracked in the repo -- this effectively restores pristine state
+        utils.runCommand('%s clean -xfd .' % constants.GIT_EXE)
+        if self.revision == 'LATEST':
+            utils.runCommand('%s checkout origin/master >> %s 2>&1' % (constants.GIT_EXE, runLogFile))
+            utils.runCommand('%s pull origin master >> %s 2>&1' % (constants.GIT_EXE, runLogFile))
+        else:
+            utils.runCommand('%s checkout origin/master >> %s 2>&1' % (constants.GIT_EXE, runLogFile))
+            utils.runCommand('%s checkout %s >> %s 2>&1' % (constants.GIT_EXE, self.revision, runLogFile))
+
+    def build(self, runLogFile):
+        x = os.getcwd()
+        try:
+            os.chdir('%s' % self.checkoutDir)
+            utils.runCommand('./gradlew :packaging:distTarFull >> %s 2>&1' % (runLogFile))
+            packaged = os.path.join(os.getcwd(), "package")
+            files = glob.glob(os.path.join(packaged, '*.tgz'))
+            if len(files) == 0:
+                raise RuntimeError('No tgz file found at %s' % packaged)
+            elif len(files) > 1:
+                raise RuntimeError('More than 1 tgz file found at %s' % packaged)
+            else:
+                return files[0]
+        finally:
+            os.chdir(x)
+
+    def get_git_rev(self):
+        x = os.getcwd()
+        try:
+            os.chdir(self.checkoutDir)
+            s = utils.run_get_output([constants.GIT_EXE, 'show', '-s', '--format=%H,%ci'])
+            sha, date = s.split(',')
+            date_parts = date.split(' ')
+            return sha, datetime.datetime.strptime('%s %s' % (date_parts[0], date_parts[1]), '%Y-%m-%d %H:%M:%S')
+        finally:
+            os.chdir(x)
+
+
+
 class SolrServer:
     def __init__(self, tgz, extract_dir, name='', host='localhost', port='8983',
                  memory=None,
