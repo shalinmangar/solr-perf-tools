@@ -1099,7 +1099,7 @@ def populate_gc_data(gcFile, gcGarbageChartData, gcPeakChartData, gcTimesChartDa
                 s = '%s,%.4f,%.4f,%.4f' % (timeStamp, float(youngGenPeak), float(survivorGenPeak), float(oldGenPeak))
                 gcPeakChartData.append(s)
     gcTimesChartData.sort()
-    gcTimesChartData.insert(0, 'Date,JIT (sec), Young GC (sec), Old GC (sec)')
+    gcTimesChartData.insert(0, 'Date,JIT (ms), Young GC (ms), Old GC (ms)')
     gcGarbageChartData.sort()
     gcGarbageChartData.insert(0, 'Date,Young Garbage (GB),Survivor Garbage (GB),Old Garbage (GB)')
     gcPeakChartData.sort()
@@ -1140,7 +1140,7 @@ def populate_cloud_gc_data(gcFile, node_data, gcTimesChartData, gcGarbageChartDa
     node2 = sorted(node_data)[1]
 
     gcTimesChartData.sort()
-    gcTimesChartData.insert(0, 'Date, %s JIT (sec), %s Young GC (sec), %s Old GC (sec), %s JIT (sec), %s Young GC (sec), %s Old GC (sec)' % (node1, node1, node1, node2, node2, node2))
+    gcTimesChartData.insert(0, 'Date, %s JIT (ms), %s Young GC (ms), %s Old GC (ms), %s JIT (ms), %s Young GC (ms), %s Old GC (ms)' % (node1, node1, node1, node2, node2, node2))
     gcGarbageChartData.sort()
     gcGarbageChartData.insert(0, 'Date, %s Young Garbage (GB), %s Survivor Garbage (GB), %s Old Garbage (GB), %s Young Garbage (GB), %s Survivor Garbage (GB), %s Old Garbage (GB)' % (node1, node1, node1, node2, node2, node2))
     gcPeakChartData.sort()
