@@ -106,5 +106,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# Java
 *.class
 build/
+
+# IntelliJ
+*.iml
