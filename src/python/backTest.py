@@ -24,11 +24,9 @@ def generate_shas(start_date, end_date, delta_days):
             shas.append(sha.strip())
             st = st + delta_days
         print('Generated %d SHAs to backtest' % len(shas))
-        print shas
+        return shas
     finally:
         os.chdir(x)
-
-    save_shas(start_date, end_date, delta_days, shas)
 
 
 def save_shas(start_date, end_date, delta_days, shas):
@@ -59,7 +57,8 @@ def main():
 
     if not os.path.exists(constants.BACK_TEST_SHAS):
         print('Generating git SHAs to back test')
-        generate_shas(start_date, end_date, delta_days)
+        shas = generate_shas(start_date, end_date, delta_days)
+        save_shas(start_date, end_date, delta_days, shas)
 
     with open(constants.BACK_TEST_SHAS, 'r') as f:
         (s, e, d, shas) = pickle.load(f)
