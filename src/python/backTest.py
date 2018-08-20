@@ -19,7 +19,8 @@ def generate_shas(start_date, end_date, delta_days):
         shas = []
         st = start_date
         while st < end_date:
-            cmd = [constants.GIT_EXE, 'rev-list', '-n', '1', '--before="%s"' % st.strftime('%Y-%m-%d %H:%M:%S'), 'master']
+            cmd = [constants.GIT_EXE,
+                   'rev-list', '-n', '1', '--before="%s"' % st.strftime('%Y-%m-%d %H:%M:%S'), 'master']
             sha = utils.run_get_output(cmd)
             shas.append(sha.strip())
             st = st + delta_days
@@ -63,7 +64,7 @@ def main():
     with open(constants.BACK_TEST_SHAS, 'r') as f:
         (s, e, d, shas) = pickle.load(f)
         print('Found')
-        print((s, e, d, shas))
+        print(s, e, d, shas)
         if s != start_date or e != end_date or d != delta_days:
             generate_shas(start_date, end_date, delta_days)
 
