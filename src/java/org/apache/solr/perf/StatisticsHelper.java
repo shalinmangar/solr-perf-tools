@@ -76,6 +76,8 @@ public class StatisticsHelper implements Runnable {
 
   protected volatile long startJITCTime;
 
+  protected volatile PeriodSampler periodSampler;
+
   protected String label;
 
   public String getLabel() {
@@ -300,6 +302,8 @@ public class StatisticsHelper implements Runnable {
       }
       startJITCTime = jitCompiler.getTotalCompilationTime();
 
+      periodSampler = new PeriodSampler(operatingSystem);
+      periodSampler.start();
       return true;
     }
   }
@@ -311,6 +315,7 @@ public class StatisticsHelper implements Runnable {
 
       memoryPoller.cancel(false);
       scheduler.shutdown();
+      periodSampler.stop();
 
       System.err.println("- - - - - - - - - - - - - - - - - - - - ");
       errPrint("Statistics Ended at " + new Date());
@@ -343,18 +348,17 @@ public class StatisticsHelper implements Runnable {
         errPrint("Garbage Generated: N/A");
       }
 
-      double systemLoadAverage = operatingSystem.getSystemLoadAverage();
-      errPrint("Average System Load: " + systemLoadAverage);
+      errPrint("Average System Load: " + periodSampler.systemLoad.average());
 
       if (operatingSystem instanceof com.sun.management.OperatingSystemMXBean) {
         com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) operatingSystem;
         long elapsedProcessCPUTime = os.getProcessCpuTime() - startProcessCPUTime;
-        errPrint("Average CPU Load: " + ((float) elapsedProcessCPUTime * 100 / elapsedTime) + "/"
+        errPrint("Average CPU Time: " + ((float) elapsedProcessCPUTime * 100 / elapsedTime) + "/"
                 + (100 * operatingSystem.getAvailableProcessors()));
-        errPrint("Process CPU Load: " + os.getProcessCpuLoad());
+        errPrint("Average CPU Load: " + (periodSampler.cpuLoad.average() * 100.0) +"%");
       } else {
+        errPrint("Average CPU Time: N/A");
         errPrint("Average CPU Load: N/A");
-        errPrint("Process CPU Load: N/A");
       }
 
       System.err.println("----------------------------------------\n");
@@ -392,4 +396,54 @@ public class StatisticsHelper implements Runnable {
     return (float) bytes / 1024 / 1024 / 1024;
   }
 
+  public static class Histogram {
+    double sum = 0;
+    double num = 0;
+
+    public synchronized void add(double val) {
+      sum += val;
+      num++;
+    }
+
+    public synchronized double average() {
+      return sum / num;
+    }
+  }
+
+  public static class PeriodSampler {
+    Timer timer = new Timer();
+    Histogram cpuLoad = new Histogram();
+    Histogram systemLoad = new Histogram();
+    OperatingSystemMXBean os;
+    long lastUpdate;
+
+    public PeriodSampler(OperatingSystemMXBean os) {
+      this.os = os;
+    }
+
+    public void start() {
+      // every minute
+      timer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+          update();
+        }
+      }, 100, 1000 * 60);
+    }
+
+    public synchronized void update () {
+      if (os instanceof com.sun.management.OperatingSystemMXBean) {
+        cpuLoad.add(((com.sun.management.OperatingSystemMXBean) os).getProcessCpuLoad());
+      }
+      systemLoad.add(os.getSystemLoadAverage());
+      lastUpdate = System.nanoTime();
+    }
+
+    public void stop() {
+      timer.cancel();
+      // kinda bias to the last minutes metrics,
+      // but on the long running task, this will be ok
+      update();
+    }
+  }
 }
