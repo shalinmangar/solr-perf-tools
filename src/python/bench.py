@@ -374,7 +374,7 @@ class BenchResults:
                 if m is not None:
                     self.avg_sys_load = m.group(1)
                 else:
-                    self.reAvgSysLoadLabel.search(line)
+                    m = self.reAvgSysLoadLabel.search(line)
                     if m is not None:
                         self.init_node_data(m.group(1))
                         self.node_data[m.group(1)]['avg_sys_load'] = m.group(2)
@@ -383,7 +383,7 @@ class BenchResults:
                 if m is not None:
                     self.avg_cpu_time = m.group(1)
                 else:
-                    self.reAvgCpuTimeLabel.search(line)
+                    m = self.reAvgCpuTimeLabel.search(line)
                     if m is not None:
                         self.init_node_data(m.group(1))
                         self.node_data[m.group(1)]['avg_cpu_time'] = m.group(2)
@@ -392,7 +392,7 @@ class BenchResults:
                 if m is not None:
                     self.avg_cpu_load = m.group(1)
                 else:
-                    self.reAvgCpuLoadLabel.search(line)
+                    m = self.reAvgCpuLoadLabel.search(line)
                     if m is not None:
                         self.init_node_data(m.group(1))
                         self.node_data[m.group(1)]['avg_cpu_load'] = m.group(2)
