@@ -8,10 +8,7 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.lang.management.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -143,7 +140,7 @@ public class StatisticsHelper implements Runnable {
   }
 
   private static StatisticsHelper createStats(MBeanServerConnection connection) throws IOException, MalformedObjectNameException {
-    OperatingSystemMXBean operatingSystem = ManagementFactory.newPlatformMXBeanProxy(connection, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class);
+    OperatingSystemMXBean operatingSystem = ManagementFactory.newPlatformMXBeanProxy(connection, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, com.sun.management.OperatingSystemMXBean.class);
     CompilationMXBean jitCompiler = ManagementFactory.newPlatformMXBeanProxy(connection, ManagementFactory.COMPILATION_MXBEAN_NAME, CompilationMXBean.class);
     MemoryMXBean heapMemory = ManagementFactory.newPlatformMXBeanProxy(connection, ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class);
 
@@ -349,16 +346,15 @@ public class StatisticsHelper implements Runnable {
       double systemLoadAverage = operatingSystem.getSystemLoadAverage();
       errPrint("Average System Load: " + systemLoadAverage);
 
-      // todo fix this
-//      System.err.println("Process CPU Load: " + getProcessCpuLoad(connection));
-
       if (operatingSystem instanceof com.sun.management.OperatingSystemMXBean) {
         com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) operatingSystem;
         long elapsedProcessCPUTime = os.getProcessCpuTime() - startProcessCPUTime;
         errPrint("Average CPU Load: " + ((float) elapsedProcessCPUTime * 100 / elapsedTime) + "/"
                 + (100 * operatingSystem.getAvailableProcessors()));
+        errPrint("Process CPU Load: " + os.getProcessCpuLoad());
       } else {
         errPrint("Average CPU Load: N/A");
+        errPrint("Process CPU Load: N/A");
       }
 
       System.err.println("----------------------------------------\n");
@@ -381,27 +377,6 @@ public class StatisticsHelper implements Runnable {
         System.err.print('\t');
       }
       System.err.println(label + " - " + message);
-    }
-  }
-
-  public static double getProcessCpuLoad(MBeanServerConnection mbs) {
-
-    try {
-      ObjectName name = ObjectName.getInstance("java.lang:type=OperatingSystem");
-      AttributeList list = mbs.getAttributes(name, new String[]{"ProcessCpuLoad"});
-
-      if (list.isEmpty()) return Double.NaN;
-
-      Attribute att = (Attribute) list.get(0);
-      Double value = (Double) att.getValue();
-
-      // usually takes a couple of seconds before we get real values
-      if (value == -1.0) return Double.NaN;
-      // returns a percentage value with 1 decimal point precision
-      return ((int) (value * 1000) / 10.0);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return Double.NaN;
     }
   }
 
