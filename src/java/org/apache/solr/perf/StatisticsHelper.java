@@ -348,14 +348,14 @@ public class StatisticsHelper implements Runnable {
         errPrint("Garbage Generated: N/A");
       }
 
-      errPrint("Average System Load: " + periodSampler.systemLoad.average());
+      errPrint(String.format("Average System Load: %.3f", periodSampler.systemLoad.average()));
 
       if (operatingSystem instanceof com.sun.management.OperatingSystemMXBean) {
         com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) operatingSystem;
         long elapsedProcessCPUTime = os.getProcessCpuTime() - startProcessCPUTime;
-        errPrint("Average CPU Time: " + ((float) elapsedProcessCPUTime * 100 / elapsedTime) + "/"
-                + (100 * operatingSystem.getAvailableProcessors()));
-        errPrint("Average CPU Load: " + (periodSampler.cpuLoad.average() * 100.0) +"%");
+        errPrint(String.format("Average CPU Time: %.3f/%d", ((float) elapsedProcessCPUTime * 100 / elapsedTime),
+                (100 * operatingSystem.getAvailableProcessors())));
+        errPrint(String.format("Average CPU Load: %.3f", (periodSampler.cpuLoad.average() * 100.0)));
       } else {
         errPrint("Average CPU Time: N/A");
         errPrint("Average CPU Load: N/A");

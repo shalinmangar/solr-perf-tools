@@ -316,6 +316,18 @@ class BenchResults:
     rePeakUsage = re.compile('^\s*Peak usage in (.*?): (.*) MiB')
     rePeakUsageLabel = re.compile('^[\\t]*(.*) - Peak usage in (.*?): (.*) MiB')
 
+    # Average System Load: 4.0068359375
+    reAvgSysLoad = re.compile('^\s*Average System Load: (.*)')
+    reAvgSysLoadLabel = re.compile('^[\\t]*(.*) - Average System Load: (.*)')
+
+    # Average CPU Time: 6.1978397/400
+    reAvgCpuTime = re.compile('^\s*Average CPU Time: (.*)')
+    reAvgCpuTimeLabel = re.compile('^[\\t]*(.*) - Average CPU Time: (.*)')
+
+    # Average CPU Load: 1.1392051484117345
+    reAvgCpuLoad = re.compile('^\s*Average CPU Load: (.*)')
+    reAvgCpuLoadLabel = re.compile('^[\\t]*(.*) - Average CPU Load: (.*)')
+
     def __init__(self, logFile, server, time_taken):
         self.timeTaken = time_taken
 
@@ -337,8 +349,7 @@ class BenchResults:
                 else:
                     m = self.reTimeInLabel.search(line)
                     if m is not None:
-                        if not self.node_data.has_key(m.group(1)):
-                            self.node_data[m.group(1)] = {'times': {}, 'garbage': {}, 'peak': {}}
+                        self.init_node_data(m.group(1))
                         self.node_data[m.group(1)]['times'][m.group(2)] = float(m.group(3)) / 1000.
 
                 m = self.reGarbageIn.search(line)
@@ -347,8 +358,7 @@ class BenchResults:
                 else:
                     m = self.reGarbageInLabel.search(line)
                     if m is not None:
-                        if not self.node_data.has_key(m.group(1)):
-                            self.node_data[m.group(1)] = {'times': {}, 'garbage': {}, 'peak': {}}
+                        self.init_node_data(m.group(1))
                         self.node_data[m.group(1)]['garbage'][m.group(2)] = float(m.group(3))
 
                 m = self.rePeakUsage.search(line)
@@ -357,14 +367,44 @@ class BenchResults:
                 else:
                     m = self.rePeakUsageLabel.search(line)
                     if m is not None:
-                        if not self.node_data.has_key(m.group(1)):
-                            self.node_data[m.group(1)] = {'times': {}, 'garbage': {}, 'peak': {}}
+                        self.init_node_data(m.group(1))
                         self.node_data[m.group(1)]['peak'][m.group(2)] = float(m.group(3))
+
+                m = self.reAvgSysLoad.search(line)
+                if m is not None:
+                    self.avg_sys_load = m.group(1)
+                else:
+                    self.reAvgSysLoadLabel.search(line)
+                    if m is not None:
+                        self.init_node_data(m.group(1))
+                        self.node_data[m.group(1)]['avg_sys_load'] = m.group(2)
+
+                m = self.reAvgCpuTime.search(line)
+                if m is not None:
+                    self.avg_cpu_time = m.group(1)
+                else:
+                    self.reAvgCpuTimeLabel.search(line)
+                    if m is not None:
+                        self.init_node_data(m.group(1))
+                        self.node_data[m.group(1)]['avg_cpu_time'] = m.group(2)
+
+                m = self.reAvgCpuLoad.search(line)
+                if m is not None:
+                    self.avg_cpu_load = m.group(1)
+                else:
+                    self.reAvgCpuLoadLabel.search(line)
+                    if m is not None:
+                        self.init_node_data(m.group(1))
+                        self.node_data[m.group(1)]['avg_cpu_load'] = m.group(2)
 
         utils.info('  took %.1f sec by client' % self.indexTimeSec)
         utils.info('  took %.1f sec total' % self.timeTaken)
 
         self.docsIndexed = server.get_num_found(constants.SOLR_COLLECTION_NAME)
+
+    def init_node_data(self, node):
+        if not self.node_data.has_key(node):
+            self.node_data[node] = {'times': {}, 'garbage': {}, 'peak': {}}
 
     def __str__(self):
         s = """Documents indexed: %d
@@ -378,8 +418,14 @@ Time taken (total): %.1f sec\n""" % (self.docsIndexed, self.bytesIndexed, self.i
                 garbage = self.node_data[k]['garbage']
                 peak = self.node_data[k]['peak']
                 s += self.get_stats_strings(times, garbage, peak)
+                s += '\tAverage System Load: %s\n' %(self.node_data[k]['avg_sys_load'])
+                s += '\tAverage CPU Time: %s\n' %(self.node_data[k]['avg_cpu_time'])
+                s += '\tAverage CPU Load: %s\n' %(self.node_data[k]['avg_cpu_load'])
         else:
             s += self.get_stats_strings(self.times, self.garbage, self.peak)
+            s += '\tAverage System Load: %s\n' % self.avg_sys_load
+            s += '\tAverage CPU Time: %s\n' % self.avg_cpu_time
+            s += '\tAverage CPU Load: %s\n' % self.avg_cpu_load
         return s
 
     def get_stats_strings(self, times, garbage, peak):
