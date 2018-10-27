@@ -16,6 +16,8 @@ import graphutils
 import utils
 
 SLACK = '-enable-slack-bot' in sys.argv and 'SLACK_BOT_TOKEN' in os.environ
+QUICK = '-quick' in sys.argv
+CLOUD_TEST_ONLY = '-cloud-test-only' in sys.argv
 NOREPORT = '-no-report' in sys.argv
 
 KNOWN_CHANGES = [
@@ -578,12 +580,18 @@ def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
 
         logFile = '%s' % runLogFile
 
+        inputFile = constants.WIKI_1K_DATA_FILE
+        expectedDocs = constants.WIKI_1K_NUM_DOCS
+        if QUICK:
+            inputFile = constants.WIKI_4K_DATA_FILE
+            expectedDocs = constants.WIKI_4k_NUM_DOCS
+
         results = bench.run('wiki-1k-schema', server,
                             'org.apache.solr.perf.WikiIndexer',
                             [
                                 # '-useHttpSolrClient', '-solrUrl', solrUrl,
                                 '-useConcurrentUpdateSolrClient', '-solrUrl', solrUrl,
-                                '-lineDocsFile', constants.WIKI_1K_DATA_FILE,
+                                '-lineDocsFile', inputFile,
                                 '-docCountLimit', '-1',
                                 '-threadCount', '9',
                                 '-batchSize', '100'], logFile)
@@ -593,7 +601,7 @@ def run_wiki_1k_schema_bench(start, tgz, runLogFile, perfFile, gcFile):
         log_metrics(logFile, server, 'wiki_1k_schema_bench')
         log_sys_stats(logFile, 'wiki_1k_schema_bench')
 
-        if docsIndexed != constants.WIKI_1K_NUM_DOCS:
+        if docsIndexed != expectedDocs:
             raise RuntimeError(
                 'Indexed num_docs do not match expected %d != found %d' % (constants.WIKI_1K_NUM_DOCS, docsIndexed))
         timeStampLoggable = '%04d-%02d-%02d %02d:%02d:%02d' % (
@@ -758,6 +766,11 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile, col
         print(r.json())
 
         logFile = '%s' % runLogFile
+        inputFile = constants.WIKI_1K_DATA_FILE
+        expectedDocs = constants.WIKI_1K_NUM_DOCS
+        if QUICK:
+            inputFile = constants.WIKI_4K_DATA_FILE
+            expectedDocs = constants.WIKI_4k_NUM_DOCS
 
         results = bench.run('wiki-1k-schema_cloud', server,
                             'org.apache.solr.perf.WikiIndexer',
@@ -765,7 +778,7 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile, col
                                 '-useCloudSolrClient',
                                 '-zkHost', 'localhost:9983',
                                 '-collection', 'gettingstarted',
-                                '-lineDocsFile', constants.WIKI_1K_DATA_FILE,
+                                '-lineDocsFile', inputFile,
                                 '-docCountLimit', '-1',
                                 '-threadCount', '9',
                                 '-batchSize', '100'], logFile)
@@ -777,7 +790,7 @@ def run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile, perfFile, gcFile, col
         log_metrics(logFile, server2, 'wiki_1k_schema_cloud_bench_8984')
         log_sys_stats(logFile, 'wiki_1k_schema_cloud')
 
-        if docsIndexed != constants.WIKI_1K_NUM_DOCS:
+        if docsIndexed != expectedDocs:
             raise RuntimeError(
                 'Indexed num_docs do not match expected %d != found %d' % (constants.WIKI_1K_NUM_DOCS, docsIndexed))
 
@@ -906,99 +919,87 @@ def main():
 
     implVersion = ''
 
-    simplePerfFile = '%s/simpleIndexer.perfdata.txt' % constants.LOG_BASE_DIR
-    simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken = run_simple_bench(start, tgz, runLogFile, simplePerfFile)
-    simpleIndexChartData = []
-    annotations = []
-    if os.path.isfile(simplePerfFile):
-        with open(simplePerfFile, 'r') as f:
-            lines = [line.rstrip('\n') for line in f]
-            for l in lines:
-                timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
-                implVersion = solrImplVersion
-                simpleIndexChartData.append(
-                    '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024.)) / float(timeTaken)))
-                for date, desc, fullDesc in KNOWN_CHANGES:
-                    if timeStamp.startswith(date):
-                        print('add annot for simple %s' % desc)
-                        annotations.append((date, timeStamp, desc, fullDesc))
-                        KNOWN_CHANGES.remove((date, desc, fullDesc))
+    if not CLOUD_TEST_ONLY:
+        simplePerfFile = '%s/simpleIndexer.perfdata.txt' % constants.LOG_BASE_DIR
+        simpleBytesIndexed, simpleDocsIndexed, simpleTimeTaken = run_simple_bench(start, tgz, runLogFile, simplePerfFile)
+        simpleIndexChartData = []
+        annotations = []
+        if os.path.isfile(simplePerfFile):
+            with open(simplePerfFile, 'r') as f:
+                lines = [line.rstrip('\n') for line in f]
+                for l in lines:
+                    timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
+                    implVersion = solrImplVersion
+                    simpleIndexChartData.append(
+                        '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024.)) / float(timeTaken)))
+                    for date, desc, fullDesc in KNOWN_CHANGES:
+                        if timeStamp.startswith(date):
+                            print('add annot for simple %s' % desc)
+                            annotations.append((date, timeStamp, desc, fullDesc))
+                            KNOWN_CHANGES.remove((date, desc, fullDesc))
 
-    simpleIndexChartData.sort()
-    simpleIndexChartData.insert(0, 'Date,MB/sec')
+        simpleIndexChartData.sort()
+        simpleIndexChartData.insert(0, 'Date,MB/sec')
 
-    # wiki cannot be indexed into schemaless because of SOLR-8495
-    # wikiSchemalessPerfFile = '%s/wiki_schemaless.perfdata.txt' % constants.LOG_BASE_DIR
-    # wikiSchemalessGcFile = '%s/wiki_schemaless.gc.txt' % constants.LOG_BASE_DIR
-    # run_wiki_schemaless_bench(start, tgz, runLogFile, wikiSchemalessPerfFile, wikiSchemalessGcFile)
-    # wikiSchemalessIndexChartData = []
-    # with open(wikiSchemalessPerfFile, 'r') as f:
-    #     lines = [line.rstrip('\n') for line in f]
-    #     for l in lines:
-    #         timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
-    #         wikiSchemalessIndexChartData.append(
-    #                 '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
-    #
-    # wikiSchemalessIndexChartData.sort()
-    # wikiSchemalessIndexChartData.insert(0, 'Date,GB/hour')
-
-    wiki1kSchemaPerfFile = '%s/wiki_1k_schema.perfdata.txt' % constants.LOG_BASE_DIR
-    wiki1kSchemaGcFile = '%s/wiki_1k_schema.gc.txt' % constants.LOG_BASE_DIR
-    wiki1kBytesIndexed, wiki1kIndexTimeSec, wiki1kDocsIndexed, \
-    wiki1kTimes, wiki1kGarbage, wiki1kPeak = run_wiki_1k_schema_bench(start, tgz, runLogFile, wiki1kSchemaPerfFile,
-                                                                      wiki1kSchemaGcFile)
-    wiki1kSchemaIndexChartData = []
-    wiki1kSchemaIndexDocsSecChartData = []
-    wiki1kSchemaGcTimesChartData = []
-    wiki1kSchemaGcGarbageChartData = []
-    wiki1kSchemaGcPeakChartData = []
-    populate_gc_data(wiki1kSchemaGcFile, wiki1kSchemaGcGarbageChartData, wiki1kSchemaGcPeakChartData,
-                     wiki1kSchemaGcTimesChartData)
-    if os.path.isfile(wiki1kSchemaPerfFile):
-        with open(wiki1kSchemaPerfFile, 'r') as f:
-            lines = [line.rstrip('\n') for line in f]
-            for l in lines:
-                timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
-                implVersion = solrImplVersion
-                wiki1kSchemaIndexChartData.append(
-                    '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
-                wiki1kSchemaIndexDocsSecChartData.append(
-                    '%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
-
-    wiki1kSchemaIndexChartData.sort()
-    wiki1kSchemaIndexChartData.insert(0, 'Date,GB/hour')
-
-    wiki1kSchemaIndexDocsSecChartData.sort()
-    wiki1kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
-
-    wiki4kSchemaPerfFile = '%s/wiki_4k_schema.perfdata.txt' % constants.LOG_BASE_DIR
-    wiki4kGcFile = '%s/wiki_4k_schema.gc.txt' % constants.LOG_BASE_DIR
-    wiki4kBytesIndexed, wiki4kIndexTimeSec, wiki4kDocsIndexed, \
-    wiki4kTimes, wiki4kGarbage, wiki4kPeak = run_wiki_4k_schema_bench(start, tgz, runLogFile, wiki4kSchemaPerfFile, wiki4kGcFile)
-    wiki4kSchemaIndexChartData = []
-    wiki4kSchemaIndexDocsSecChartData = []
-
-    wiki4kSchemaGcTimesChartData = []
-    wiki4kSchemaGcGarbageChartData = []
-    wiki4kSchemaGcPeakChartData = []
-    populate_gc_data(wiki4kGcFile, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData,
-                     wiki4kSchemaGcTimesChartData)
-
-    if os.path.isfile(wiki4kSchemaPerfFile):
-        with open(wiki4kSchemaPerfFile, 'r') as f:
-            lines = [line.rstrip('\n') for line in f]
-            for l in lines:
-                timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
-                implVersion = solrImplVersion
-                wiki4kSchemaIndexChartData.append(
+    if not CLOUD_TEST_ONLY:
+        wiki1kSchemaPerfFile = '%s/wiki_1k_schema.perfdata.txt' % constants.LOG_BASE_DIR
+        wiki1kSchemaGcFile = '%s/wiki_1k_schema.gc.txt' % constants.LOG_BASE_DIR
+        wiki1kBytesIndexed, wiki1kIndexTimeSec, wiki1kDocsIndexed, \
+        wiki1kTimes, wiki1kGarbage, wiki1kPeak = run_wiki_1k_schema_bench(start, tgz, runLogFile, wiki1kSchemaPerfFile,
+                                                                          wiki1kSchemaGcFile)
+        wiki1kSchemaIndexChartData = []
+        wiki1kSchemaIndexDocsSecChartData = []
+        wiki1kSchemaGcTimesChartData = []
+        wiki1kSchemaGcGarbageChartData = []
+        wiki1kSchemaGcPeakChartData = []
+        populate_gc_data(wiki1kSchemaGcFile, wiki1kSchemaGcGarbageChartData, wiki1kSchemaGcPeakChartData,
+                         wiki1kSchemaGcTimesChartData)
+        if os.path.isfile(wiki1kSchemaPerfFile):
+            with open(wiki1kSchemaPerfFile, 'r') as f:
+                lines = [line.rstrip('\n') for line in f]
+                for l in lines:
+                    timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
+                    implVersion = solrImplVersion
+                    wiki1kSchemaIndexChartData.append(
                         '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
-                wiki4kSchemaIndexDocsSecChartData.append('%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
+                    wiki1kSchemaIndexDocsSecChartData.append(
+                        '%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
 
-    wiki4kSchemaIndexChartData.sort()
-    wiki4kSchemaIndexChartData.insert(0, 'Date,GB/hour')
+        wiki1kSchemaIndexChartData.sort()
+        wiki1kSchemaIndexChartData.insert(0, 'Date,GB/hour')
 
-    wiki4kSchemaIndexDocsSecChartData.sort()
-    wiki4kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
+        wiki1kSchemaIndexDocsSecChartData.sort()
+        wiki1kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
+
+    if not CLOUD_TEST_ONLY:
+        wiki4kSchemaPerfFile = '%s/wiki_4k_schema.perfdata.txt' % constants.LOG_BASE_DIR
+        wiki4kGcFile = '%s/wiki_4k_schema.gc.txt' % constants.LOG_BASE_DIR
+        wiki4kBytesIndexed, wiki4kIndexTimeSec, wiki4kDocsIndexed, \
+        wiki4kTimes, wiki4kGarbage, wiki4kPeak = run_wiki_4k_schema_bench(start, tgz, runLogFile, wiki4kSchemaPerfFile, wiki4kGcFile)
+        wiki4kSchemaIndexChartData = []
+        wiki4kSchemaIndexDocsSecChartData = []
+
+        wiki4kSchemaGcTimesChartData = []
+        wiki4kSchemaGcGarbageChartData = []
+        wiki4kSchemaGcPeakChartData = []
+        populate_gc_data(wiki4kGcFile, wiki4kSchemaGcGarbageChartData, wiki4kSchemaGcPeakChartData,
+                         wiki4kSchemaGcTimesChartData)
+
+        if os.path.isfile(wiki4kSchemaPerfFile):
+            with open(wiki4kSchemaPerfFile, 'r') as f:
+                lines = [line.rstrip('\n') for line in f]
+                for l in lines:
+                    timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
+                    implVersion = solrImplVersion
+                    wiki4kSchemaIndexChartData.append(
+                            '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
+                    wiki4kSchemaIndexDocsSecChartData.append('%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
+
+        wiki4kSchemaIndexChartData.sort()
+        wiki4kSchemaIndexChartData.insert(0, 'Date,GB/hour')
+
+        wiki4kSchemaIndexDocsSecChartData.sort()
+        wiki4kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
     wiki1kSchemaCloudPerfFile = '%s/wiki_1k_schema_cloud.perfdata.txt' % constants.LOG_BASE_DIR
     wiki1kCloudGcFile = '%s/wiki_1k_schema_cloud.gc.txt' % constants.LOG_BASE_DIR
@@ -1070,7 +1071,7 @@ def main():
     wiki1kCloud1x2IndexDocsSecChartData.sort()
     wiki1kCloud1x2IndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
-    if not NOREPORT:
+    if not NOREPORT or not CLOUD_TEST_ONLY:
         graphutils.writeIndexingHTML(annotations,
                                      [simpleIndexChartData,
                                       wiki1kSchemaIndexChartData, wiki1kSchemaIndexDocsSecChartData,
