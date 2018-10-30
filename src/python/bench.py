@@ -1001,39 +1001,40 @@ def main():
         wiki4kSchemaIndexDocsSecChartData.sort()
         wiki4kSchemaIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
-    wiki1kSchemaCloudPerfFile = '%s/wiki_1k_schema_cloud.perfdata.txt' % constants.LOG_BASE_DIR
-    wiki1kCloudGcFile = '%s/wiki_1k_schema_cloud.gc.txt' % constants.LOG_BASE_DIR
-    results = run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile,
-                                                                                           wiki1kSchemaCloudPerfFile,
-                                                                                           wiki1kCloudGcFile,
-                                                                                           create_collection_2x1)
+    if not CLOUD_TEST_ONLY:
+        wiki1kSchemaCloudPerfFile = '%s/wiki_1k_schema_cloud.perfdata.txt' % constants.LOG_BASE_DIR
+        wiki1kCloudGcFile = '%s/wiki_1k_schema_cloud.gc.txt' % constants.LOG_BASE_DIR
+        results = run_wiki_1k_schema_cloud_bench(start, tgz, runLogFile,
+                                                                                               wiki1kSchemaCloudPerfFile,
+                                                                                               wiki1kCloudGcFile,
+                                                                                               create_collection_2x1)
 
-    wiki1kCloudBytesIndexed, wiki1kCloudIndexTimeSec, wiki1kCloudDocsIndexed = [results.bytesIndexed, results.indexTimeSec, results.docsIndexed]
+        wiki1kCloudBytesIndexed, wiki1kCloudIndexTimeSec, wiki1kCloudDocsIndexed = [results.bytesIndexed, results.indexTimeSec, results.docsIndexed]
 
-    wiki1kCloudGcTimesChartData = []
-    wiki1kCloudGcGarbageChartData = []
-    wiki1kCloudGcPeakChartData = []
-    populate_cloud_gc_data(wiki1kCloudGcFile, results.node_data, wiki1kCloudGcTimesChartData, wiki1kCloudGcGarbageChartData, wiki1kCloudGcPeakChartData)
+        wiki1kCloudGcTimesChartData = []
+        wiki1kCloudGcGarbageChartData = []
+        wiki1kCloudGcPeakChartData = []
+        populate_cloud_gc_data(wiki1kCloudGcFile, results.node_data, wiki1kCloudGcTimesChartData, wiki1kCloudGcGarbageChartData, wiki1kCloudGcPeakChartData)
 
-    wiki1kCloudIndexChartData = []
-    wiki1kCloudIndexDocsSecChartData = []
+        wiki1kCloudIndexChartData = []
+        wiki1kCloudIndexDocsSecChartData = []
 
-    if os.path.isfile(wiki1kSchemaCloudPerfFile):
-        with open(wiki1kSchemaCloudPerfFile, 'r') as f:
-            lines = [line.rstrip('\n') for line in f]
-            for l in lines:
-                timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
-                implVersion = solrImplVersion
-                wiki1kCloudIndexChartData.append(
-                    '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
-                wiki1kCloudIndexDocsSecChartData.append(
-                    '%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
+        if os.path.isfile(wiki1kSchemaCloudPerfFile):
+            with open(wiki1kSchemaCloudPerfFile, 'r') as f:
+                lines = [line.rstrip('\n') for line in f]
+                for l in lines:
+                    timeStamp, bytesIndexed, docsIndexed, timeTaken, solrMajorVersion, solrImplVersion = l.split(',')
+                    implVersion = solrImplVersion
+                    wiki1kCloudIndexChartData.append(
+                        '%s,%.1f' % (timeStamp, (int(bytesIndexed) / (1024 * 1024 * 1024.)) / (float(timeTaken) / 3600.)))
+                    wiki1kCloudIndexDocsSecChartData.append(
+                        '%s,%.1f' % (timeStamp, (int(docsIndexed) / 1000) / float(timeTaken)))
 
-    wiki1kCloudIndexChartData.sort()
-    wiki1kCloudIndexChartData.insert(0, 'Date,GB/hour')
+        wiki1kCloudIndexChartData.sort()
+        wiki1kCloudIndexChartData.insert(0, 'Date,GB/hour')
 
-    wiki1kCloudIndexDocsSecChartData.sort()
-    wiki1kCloudIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
+        wiki1kCloudIndexDocsSecChartData.sort()
+        wiki1kCloudIndexDocsSecChartData.insert(0, 'Date,K docs/sec')
 
     wiki1kSchemaCloud1x2PerfFile = '%s/wiki_1k_schema_cloud1x2.perfdata.txt' % constants.LOG_BASE_DIR
     wiki1kCloud1x2GcFile = '%s/wiki_1k_schema_cloud1x2.gc.txt' % constants.LOG_BASE_DIR
