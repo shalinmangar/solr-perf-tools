@@ -904,16 +904,21 @@ def main():
         os.makedirs(runLogDir)
 
     print('Logging to %s' % runLogFile)
-    solr.checkout(runLogFile)
-    sha, git_date = solr.get_git_rev()
 
-    if '-log-by-commit-date' in sys.argv:
-        start = git_date
-        timeStamp = '%04d.%02d.%02d.%02d.%02d.%02d' % (
-            git_date.year, git_date.month, git_date.day, git_date.hour, git_date.minute, git_date.second)
+    if '-tgz' in sys.argv:
+        index = sys.argv.index('-logFile')
+        tgz = sys.argv[index+1]
+    else:
+        solr.checkout(runLogFile)
+        sha, git_date = solr.get_git_rev()
 
-    tgz = solr.build(runLogFile)
-    utils.info('Solr tgz file created at: %s' % tgz)
+        if '-log-by-commit-date' in sys.argv:
+            start = git_date
+            timeStamp = '%04d.%02d.%02d.%02d.%02d.%02d' % (
+                git_date.year, git_date.month, git_date.day, git_date.hour, git_date.minute, git_date.second)
+
+        tgz = solr.build(runLogFile)
+        utils.info('Solr tgz file created at: %s' % tgz)
 
     log_sys_stats(runLogFile, 'startup')
 
