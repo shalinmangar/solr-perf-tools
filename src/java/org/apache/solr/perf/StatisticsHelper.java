@@ -133,7 +133,7 @@ public class StatisticsHelper implements Runnable {
   }
 
   public static StatisticsHelper createRemoteStats(String port) throws IOException, MalformedObjectNameException {
-    String url = "service:jmx:rmi:///jndi/rmi://127.0.1.1:" + port + "/jmxrmi";
+    String url = "service:jmx:rmi:///jndi/rmi://localhost:" + port + "/jmxrmi";
     JMXServiceURL serviceURL = new JMXServiceURL(url);
     JMXConnector jmxConnector = JMXConnectorFactory.connect(serviceURL);
     MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
