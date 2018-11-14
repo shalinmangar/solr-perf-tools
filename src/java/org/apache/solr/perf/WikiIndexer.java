@@ -19,6 +19,7 @@ package org.apache.solr.perf;
 
 
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.*;
 import org.apache.solr.common.cloud.DocCollection;
 import org.apache.solr.common.cloud.Replica;
@@ -176,6 +177,29 @@ public final class WikiIndexer {
         concurrentUpdateSolrClient.blockUntilFinished();
       }
       client.commit();
+      if (client instanceof CloudSolrClient) {
+        CloudSolrClient c = (CloudSolrClient) client;
+        DocCollection collection = c.getZkStateReader().getClusterState().getCollection("gettingstarted");
+        OUT:
+        for (Slice slice : collection.getActiveSlices()) {
+          long numFound = -1;
+          for (Replica replica : slice.getReplicas()) {
+            try (HttpSolrClient repClient = new HttpSolrClient.Builder(replica.getBaseUrl()).build()) {
+              long repNumFound = repClient.query("gettingstarted", new SolrQuery("*:*"))
+                  .getResults().getNumFound();
+              if (numFound == -1) {
+                numFound = repNumFound;
+              } else {
+                if (numFound != repNumFound) {
+                  System.out.println("Consistency error "+numFound+" vs " + repNumFound + " for shard " + slice.getName());
+                  break OUT;
+                }
+              }
+            }
+          }
+          System.out.println("Consistency success " + numFound + " for shard " + slice.getName());
+        }
+      }
 
       final long tFinal = System.currentTimeMillis();
       System.out.println("\nIndexer: finished (" + (tFinal - t0) + " msec)");

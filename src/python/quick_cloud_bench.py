@@ -233,6 +233,8 @@ class BenchResults:
         self.peak = {}
         with open(logFile) as f:
             for line in f.readlines():
+                if line.startswith('Consistency'):
+                    utils.info(line)
                 m = self.reTimeIn.search(line)
                 if m is not None:
                     self.times[m.group(1)] = float(m.group(2)) / 1000.
