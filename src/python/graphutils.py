@@ -122,9 +122,9 @@ def footer(w):
     w('</ul>')
 
     w('<br>')
-    w('''java version "1.8.0_181"<br>
-    Java(TM) SE Runtime Environment (build 1.8.0_181-b13)<br>
-    Java HotSpot(TM) 64-Bit Server VM (build 25.181-b13, mixed mode)<br>''')
+    w('''openjdk version "11.0.3" 2019-04-16<br>
+        OpenJDK Runtime Environment AdoptOpenJDK (build 11.0.3+7)<br>
+        OpenJDK 64-Bit Server VM AdoptOpenJDK (build 11.0.3+7, mixed mode)<br>''')
 
     w('<br>')
     w('Machine specifications:')
