@@ -883,6 +883,8 @@ def main():
     timeStamp = '%04d.%02d.%02d.%02d.%02d.%02d' % (
         start.year, start.month, start.day, start.hour, start.minute, start.second)
 
+    print('Current date/time: %s' % timeStamp)
+
     if SLACK:
         try:
             slackUrl = os.environ.get('SLACK_URL')

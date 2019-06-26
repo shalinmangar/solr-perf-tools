@@ -111,12 +111,43 @@ def header(w, title):
 
 def footer(w):
     w('<br>')
-    # w('Solr options:')
-    # w('<ul>')
-    # w('<li>IMDB dataset: <code>bin/solr -e schemaless -m 4g</code></li>')
-    # w('<li>Wiki 1KB dataset: <code>bin/solr -e schemaless -m 4g</code></li>')
-    # w('<li>Wiki 4KB dataset: <code>bin/solr -e schemaless -m 4g</code></li>')
-    # w('</ul>')
+    w('Solr options:')
+    w('<ul>')
+    w('<li>IMDB dataset: <code>bin/solr -e schemaless -m 4g</code></li>')
+    w('<li>Wiki 1KB dataset: <code>bin/solr -e schemaless -m 4g</code></li>')
+    w('<li>Wiki 4KB dataset: <code>bin/solr -e schemaless -m 4g</code></li>')
+    w('<li>SolrCloud Tests '
+      '<code>bin/solr -m 4g -c</code> and <code>bin/solr -p 8984 -z localhost:9983 -m 4g -c</code></li>')
+    w('<li>The defaults values for GC, commit intervals and http connection parameters are used as per the master branch at that point in time</li>')
+    w('</ul>')
+
+    w('<br>')
+    w('''java version "1.8.0_181"<br>
+    Java(TM) SE Runtime Environment (build 1.8.0_181-b13)<br>
+    Java HotSpot(TM) 64-Bit Server VM (build 25.181-b13, mixed mode)<br>''')
+
+    w('<br>')
+    w('Machine specifications:')
+    w('<ul>')
+    w('<li><a href="https://www.packet.com/cloud/servers/c1-small/">Packet bare metal c1.small.x86</a></li>')
+    w('<li>Modified boot config to keep 2 × 120 GB disks separate so that solr cloud tests can run two nodes on different physical disks</li>')
+    w('</ul>')
+
+    w('<br>')
+    w('JIT/GC/Garbage')
+    w('<ul>')
+    w('JIT compilation time is obtained from JMX\'s '
+      '<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/management/CompilationMXBean.html#getTotalCompilationTime()">CompilationMXBean.getTotalCompilationTime()</a>.')
+    w('</ul>')
+    w('<ul>')
+    w('GC times are collected from JMX\'s <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/management/GarbageCollectorMXBean.html#getCollectionTime()">GarbageCollectorMXBean.getCollectionTime()</a>')
+    w('</ul>')
+    w('<ul>')
+    w('Garbage created is the estimated total memory used by various memory pools viz. eden/young, survivor and old generation pool. '
+      'It is calculated by sampling the value of JMX\'s '
+      '<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/management/MemoryPoolMXBean.html">MemoryPoolMXBean.getUsage().getUsed()</a>, '
+      'subtracting it with the last known value and summing it over all samples.')
+    w('</ul>')
     w(
         '<br><em>[last updated: %s; send questions to <a href="mailto:shalin@apache.org">Shalin Shekhar Mangar</a>]</em>' % datetime.datetime.now())
     w('</body>')
